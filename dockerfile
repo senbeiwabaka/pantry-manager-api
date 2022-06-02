@@ -11,7 +11,7 @@ RUN ls src
 
 FROM rust:1.61.0-slim
 
-COPY --from=builder Rocket.toml /app
+COPY --from=builder /Rocket.toml /app
 COPY --from=builder src/target/release /app
 
 WORKDIR /app
