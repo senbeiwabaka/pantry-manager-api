@@ -1,0 +1,18 @@
+FROM rust:1.61.0 AS builder
+
+WORKDIR /src
+
+COPY ./ .
+
+RUN cargo build --release
+
+FROM rust:1.61.0-slin
+
+COPY --from=builder ./target/release /app
+COPY --from=builder ./Rocket.toml /app
+
+WORKDIR /app
+
+EXPOSE 8000
+
+CMD ["pantry-manager-api.exe"]
