@@ -6,7 +6,7 @@ COPY ./ .
 
 RUN ls
 
-RUN ls ./src/target
+RUN ls /src
 
 #RUN cargo build --release
 
