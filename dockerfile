@@ -4,7 +4,9 @@ WORKDIR /src
 
 COPY ./ .
 
- RUN ls
+RUN ls
+
+RUN ls src/target
 
 #RUN cargo build --release
 
