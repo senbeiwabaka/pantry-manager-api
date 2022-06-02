@@ -4,15 +4,17 @@ WORKDIR /src
 
 COPY ./ .
 
-RUN cargo build --release
+ RUN ls
 
-FROM rust:1.61.0-slim
+#RUN cargo build --release
 
-COPY --from=builder ./target/release /app
-COPY --from=builder ./Rocket.toml /app
+#FROM rust:1.61.0-slim
 
-WORKDIR /app
+#COPY --from=builder ./target/release /app
+#COPY --from=builder ./Rocket.toml /app
 
-EXPOSE 8000
+#WORKDIR /app
 
-CMD ["pantry-manager-api.exe"]
+#EXPOSE 8000
+
+#CMD ["pantry-manager-api.exe"]
