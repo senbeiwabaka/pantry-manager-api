@@ -1,0 +1,134 @@
+use sea_orm::{entity::*, DatabaseConnection};
+use sea_orm_rocket::Connection;
+use serde::{Deserialize, Serialize};
+
+use crate::{Db, models::Product};
+
+use entity::products;
+use entity::products::Entity as ProductEntity;
+
+pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
+    let db = conn.into_inner();
+    let product_entities: Vec<products::Model> = ProductEntity::find().all(db).await.ok().unwrap();
+
+    dbg!(&product_entities);
+
+    let mut products: Vec<Product> = Vec::new();
+
+    for product_entity in product_entities {
+        let product = Product {
+            brand: product_entity.brand.unwrap(),
+            category: product_entity.category.unwrap(),
+            image_url: product_entity.image_url,
+            label: product_entity.label.unwrap(),
+            upc: product_entity.upc,
+        };
+
+        products.push(product);
+    }
+
+    products
+}
+
+pub async fn add_product(db: &DatabaseConnection, product: &Product) {
+    products::ActiveModel {
+        brand: Set(Some(product.brand.to_owned())),
+        category: Set(Some(product.category.to_owned())),
+        label: Set(Some(product.label.to_owned())),
+        upc: Set(product.upc.to_owned()),
+        ..Default::default()
+    }
+    .save(db)
+    .await
+    .expect("Failed to save new product");
+}
+
+pub async fn get_product_by_upc(upc: &String) -> Option<Product> {
+    let request_url = format!(
+        "https://edamam-food-and-grocery-database.p.rapidapi.com/parser?upc={}",
+        upc
+    );
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(request_url)
+        .header(
+            "x-rapidapi-host",
+            "edamam-food-and-grocery-database.p.rapidapi.com",
+        )
+        .header(
+            "x-rapidapi-key",
+            "7de3b33551msh95e109d0bffdbd9p1b41d7jsn58568e27de5d",
+        )
+        // confirm the request using send()
+        .send()
+        .await
+        .unwrap();
+
+    let edaman_product: EdamamProduct;
+
+    match response.status() {
+        reqwest::StatusCode::OK => {
+            // on success, parse our JSON to an APIResponse
+            match response.json::<EdamamProduct>().await {
+                Ok(parsed) => {
+                    println!("Success! {:?}", parsed);
+                    edaman_product = parsed;
+                }
+                Err(_) => {
+                    println!("Hm, the response didn't match the shape we expected.");
+
+                    return None;
+                }
+            };
+        }
+        reqwest::StatusCode::UNAUTHORIZED => {
+            println!("Need to grab a new token");
+
+            return None;
+        }
+        other => {
+            println!("Uh oh! Something unexpected happened: {:?}", other);
+
+            return None;
+        }
+    }
+
+    dbg!(&edaman_product);
+
+    Some(Product {
+        upc: String::from(upc),
+        label: String::from(&edaman_product.hints[0].food.label),
+        brand: String::from(&edaman_product.hints[0].food.brand),
+        category: String::from(&edaman_product.hints[0].food.category),
+        image_url: None,
+    })
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct EdamamProduct {
+    text: String,
+    hints: Vec<Hint>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Hint {
+    food: Food,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Food {
+    label: String,
+    brand: String,
+    category: String,
+    image: String,
+}
+
+impl Default for EdamamProduct {
+    fn default() -> EdamamProduct {
+        EdamamProduct {
+            text: String::new(),
+            hints: Vec::new(),
+        }
+    }
+}

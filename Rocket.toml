@@ -1,0 +1,2 @@
+[default.databases.pantry_manager]
+url = "postgres://postgres:mysecretpassword@infrastructure-pi-2.home.arpa:5432/test"
