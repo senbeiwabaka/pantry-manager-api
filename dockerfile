@@ -6,10 +6,10 @@ COPY ./ .
 
 RUN cargo build --release
 
-FROM rust:1.61.0-slin
+FROM rust:1.61.0-slim
 
-COPY --from=builder ./target/release /app
-COPY --from=builder ./Rocket.toml /app
+COPY --from=builder target/release /app
+COPY --from=builder Rocket.toml /app
 
 WORKDIR /app
 
