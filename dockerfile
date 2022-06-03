@@ -13,6 +13,8 @@ WORKDIR /app
 COPY --from=builder /src/Rocket.toml /app
 COPY --from=builder /src/target/release/* /app/
 
+RUN ls /app
+
 EXPOSE 8000
 
-CMD ["pantry-manager-api.exe"]
+CMD ["./pantry-manager-api.exe"]
