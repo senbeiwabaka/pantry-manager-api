@@ -11,6 +11,8 @@ RUN cargo build --release
 
 FROM rust:1.61.0-slim
 
+WORKDIR /src
+
 RUN ls
 RUN ls /src
 
