@@ -17,4 +17,4 @@ RUN ls /app
 
 EXPOSE 8000
 
-CMD ["./pantry-manager-api.exe"]
+CMD ["./pantry-manager-api"]
