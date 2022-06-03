@@ -4,7 +4,7 @@ WORKDIR /src
 
 COPY ./ .
 
-# RUN cargo build --release
+RUN cargo build --release
 
 FROM rust:1.61.0-slim
 
