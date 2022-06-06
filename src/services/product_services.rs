@@ -58,7 +58,7 @@ pub async fn get_product_by_upc(upc: &String) -> Option<Product> {
         )
         .header(
             "x-rapidapi-key",
-            "7de3b33551msh95e109d0bffdbd9p1b41d7jsn58568e27de5d",
+            "",
         )
         // confirm the request using send()
         .send()
