@@ -6,7 +6,7 @@ COPY ./ .
 
 RUN cargo build --release
 
-FROM rust:1.61.0-slim
+FROM alpine:latest
 
 WORKDIR /app
 
@@ -17,4 +17,4 @@ RUN ls /app
 
 EXPOSE 8000
 
-CMD ["./pantry-manager-api"]
+ENTRYPOINT  ["/pantry-manager-api"]
