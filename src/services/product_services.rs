@@ -2,7 +2,7 @@ use sea_orm::{entity::*, DatabaseConnection};
 use sea_orm_rocket::Connection;
 use serde::{Deserialize, Serialize};
 
-use crate::{Db, models::Product};
+use crate::{models::Product, Db};
 
 use entity::products;
 use entity::products::Entity as ProductEntity;
@@ -43,7 +43,7 @@ pub async fn add_product(db: &DatabaseConnection, product: &Product) {
     .expect("Failed to save new product");
 }
 
-pub async fn get_product_by_upc(upc: &String) -> Option<Product> {
+pub async fn get_product_by_upc(key: &String, upc: &String) -> Option<Product> {
     let request_url = format!(
         "https://edamam-food-and-grocery-database.p.rapidapi.com/parser?upc={}",
         upc
@@ -56,10 +56,7 @@ pub async fn get_product_by_upc(upc: &String) -> Option<Product> {
             "x-rapidapi-host",
             "edamam-food-and-grocery-database.p.rapidapi.com",
         )
-        .header(
-            "x-rapidapi-key",
-            "",
-        )
+        .header("x-rapidapi-key", key)
         // confirm the request using send()
         .send()
         .await

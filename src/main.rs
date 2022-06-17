@@ -5,12 +5,17 @@ mod models;
 mod services;
 
 use migration::MigratorTrait;
+use models::AppConfig;
 use repository_db::Db;
 use rocket::{
     fairing::{self, AdHoc},
+    figment::{
+        providers::{Env, Format, Toml},
+        Figment, Profile,
+    },
     response::status::{self, *},
     serde::json::Json,
-    Build, Rocket,
+    Build, Config, Rocket,
 };
 
 use sea_orm_rocket::{Connection, Database};
@@ -19,15 +24,29 @@ use crate::{models::Product, services::product_services};
 
 #[launch]
 fn rocket() -> _ {
+    let figment = Figment::new()
+        .merge(Toml::file("Rocket.toml"))
+        .merge(Env::prefixed("PANTRY_API_"))
+        .select(Profile::from_env_or(
+            "ROCKET_PROFILE",
+            Config::DEBUG_PROFILE,
+        ));
+
+    let config: AppConfig = figment.focus("pantry_manager_api").extract().unwrap();
+
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
+        .attach(AdHoc::on_ignite(
+            "Application Config",
+            |rocket| async move { rocket.manage(config) },
+        ))
         .mount("/", routes![upc, get_all_products, add_product])
 }
 
 #[get("/pantry-manager/upc-lookup/<upc>")]
-async fn upc(upc: String) -> Result<Json<Product>, NotFound<String>> {
-    let result = product_services::get_product_by_upc(&upc).await;
+async fn upc(config: AppConfig, upc: String) -> Result<Json<Product>, NotFound<String>> {
+    let result = product_services::get_product_by_upc(&config.edaman_api_key, &upc).await;
     let product: Product;
 
     match result {
