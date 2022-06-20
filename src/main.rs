@@ -15,7 +15,7 @@ use rocket::{
     },
     response::status::{self, *},
     serde::json::Json,
-    Build, Config, Rocket,
+    Build, Config, Rocket, State,
 };
 
 use sea_orm_rocket::{Connection, Database};
@@ -34,6 +34,8 @@ fn rocket() -> _ {
 
     let config: AppConfig = figment.focus("pantry_manager_api").extract().unwrap();
 
+    dbg!(&config);
+
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
@@ -45,8 +47,9 @@ fn rocket() -> _ {
 }
 
 #[get("/pantry-manager/upc-lookup/<upc>")]
-async fn upc(config: AppConfig, upc: String) -> Result<Json<Product>, NotFound<String>> {
-    let result = product_services::get_product_by_upc(&config.edaman_api_key, &upc).await;
+async fn upc(state: &State<AppConfig>, upc: String) -> Result<Json<Product>, NotFound<String>> {
+    let app_config = state.inner();
+    let result = product_services::get_product_by_upc(&app_config.edaman_api_key, &upc).await;
     let product: Product;
 
     match result {

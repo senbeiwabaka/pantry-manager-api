@@ -1,11 +1,3 @@
-use rocket::{
-    figment::{
-        providers::{Env, Format, Toml},
-        Profile,
-    },
-    request::{self, FromRequest},
-    Config, Request,
-};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -48,26 +40,4 @@ pub struct GroceryListItem {
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct AppConfig {
     pub edaman_api_key: String,
-}
-
-#[async_trait]
-impl<'r> FromRequest<'r> for AppConfig {
-    type Error = std::convert::Infallible;
-
-    async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, Self::Error> {
-        let figment = request
-            .rocket()
-            .figment()
-            .clone()
-            .merge(Toml::file("Rocket.toml"))
-            .merge(Env::prefixed("PANTRY_API_"))
-            .select(Profile::from_env_or(
-                "ROCKET_PROFILE",
-                Config::DEBUG_PROFILE,
-            ));
-
-        let config: AppConfig = figment.focus("pantry_manager_api").extract().unwrap();
-
-        request::Outcome::Success(config)
-    }
 }
