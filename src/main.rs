@@ -18,6 +18,7 @@ use rocket::{
     Build, Config, Rocket, State,
 };
 
+use rocket_cors::AllowedOrigins;
 use sea_orm_rocket::{Connection, Database};
 
 use crate::{models::Product, services::product_services};
@@ -36,6 +37,16 @@ fn rocket() -> _ {
 
     dbg!(&config);
 
+    let allowed_origins = AllowedOrigins::All;
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        ..Default::default()
+    }
+    .to_cors()
+    .unwrap();
+
+    dbg!(&cors);
+
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
@@ -43,6 +54,7 @@ fn rocket() -> _ {
             "Application Config",
             |rocket| async move { rocket.manage(config) },
         ))
+        .attach(cors)
         .mount("/", routes![upc, get_all_products, add_product])
 }
 
