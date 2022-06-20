@@ -17,7 +17,7 @@ pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
 
     for product_entity in product_entities {
         let product = Product {
-            brand: product_entity.brand.unwrap(),
+            brand: product_entity.brand,
             category: product_entity.category.unwrap(),
             image_url: product_entity.image_url,
             label: product_entity.label.unwrap(),
@@ -32,7 +32,7 @@ pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
 
 pub async fn add_product(db: &DatabaseConnection, product: &Product) {
     products::ActiveModel {
-        brand: Set(Some(product.brand.to_owned())),
+        brand: Set(product.brand.to_owned()),
         category: Set(Some(product.category.to_owned())),
         label: Set(Some(product.label.to_owned())),
         upc: Set(product.upc.to_owned()),
@@ -64,6 +64,8 @@ pub async fn get_product_by_upc(key: &String, upc: &String) -> Option<Product> {
 
     let edaman_product: EdamamProduct;
 
+    dbg!(&response);
+
     match response.status() {
         reqwest::StatusCode::OK => {
             // on success, parse our JSON to an APIResponse
@@ -72,7 +74,8 @@ pub async fn get_product_by_upc(key: &String, upc: &String) -> Option<Product> {
                     println!("Success! {:?}", parsed);
                     edaman_product = parsed;
                 }
-                Err(_) => {
+                Err(error) => {
+                    println!("error {}", error);
                     println!("Hm, the response didn't match the shape we expected.");
 
                     return None;
@@ -96,9 +99,9 @@ pub async fn get_product_by_upc(key: &String, upc: &String) -> Option<Product> {
     Some(Product {
         upc: String::from(upc),
         label: String::from(&edaman_product.hints[0].food.label),
-        brand: String::from(&edaman_product.hints[0].food.brand),
+        brand: edaman_product.hints[0].food.brand.to_owned(),
         category: String::from(&edaman_product.hints[0].food.category),
-        image_url: None,
+        image_url: edaman_product.hints[0].food.image.to_owned(),
     })
 }
 
@@ -116,9 +119,9 @@ struct Hint {
 #[derive(Serialize, Deserialize, Debug)]
 struct Food {
     label: String,
-    brand: String,
+    brand: Option<String>,
     category: String,
-    image: String,
+    image: Option<String>,
 }
 
 impl Default for EdamamProduct {

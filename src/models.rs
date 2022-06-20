@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct Product {
     pub upc: String,
     pub label: String,
-    pub brand: String,
+    pub brand: Option<String>,
     pub category: String,
     pub image_url: Option<String>,
 }
@@ -14,7 +14,7 @@ impl Clone for Product {
         Product {
             upc: String::from(&self.upc),
             label: String::from(&self.upc),
-            brand: String::from(&self.upc),
+            brand: Some(String::from(&self.upc)),
             category: String::from(&self.upc),
             image_url: None,
         }

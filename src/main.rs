@@ -33,6 +33,8 @@ fn rocket() -> _ {
             Config::DEBUG_PROFILE,
         ));
 
+    dbg!(&figment);
+
     let config: AppConfig = figment.focus("pantry_manager_api").extract().unwrap();
 
     dbg!(&config);
