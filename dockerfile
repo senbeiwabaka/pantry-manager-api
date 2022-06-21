@@ -17,4 +17,4 @@ RUN ls /app
 
 EXPOSE 8000
 
-ENTRYPOINT  ["/pantry-manager-api"]
+ENTRYPOINT  ["/app/pantry-manager-api"]
