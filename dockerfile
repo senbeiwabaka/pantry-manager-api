@@ -6,7 +6,7 @@ COPY ./ .
 
 RUN cargo build --release
 
-FROM rust:slim-buster
+FROM alpine:latest
 
 WORKDIR /app
 
