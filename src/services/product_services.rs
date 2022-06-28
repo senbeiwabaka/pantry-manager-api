@@ -9,25 +9,25 @@ use entity::products::Entity as ProductEntity;
 
 pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
     let db = conn.into_inner();
-    let product_entities: Vec<products::Model> = ProductEntity::find().all(db).await.ok().unwrap();
+    let entities: Vec<products::Model> = ProductEntity::find().all(db).await.ok().unwrap();
 
-    dbg!(&product_entities);
+    dbg!(&entities);
 
-    let mut products: Vec<Product> = Vec::new();
+    let mut results: Vec<Product> = Vec::new();
 
-    for product_entity in product_entities {
-        let product = Product {
-            brand: product_entity.brand,
-            category: product_entity.category.unwrap(),
-            image_url: product_entity.image_url,
-            label: product_entity.label.unwrap(),
-            upc: product_entity.upc,
+    for entity in entities {
+        let result = Product {
+            brand: entity.brand,
+            category: entity.category.unwrap(),
+            image_url: entity.image_url,
+            label: entity.label.unwrap(),
+            upc: entity.upc,
         };
 
-        products.push(product);
+        results.push(result);
     }
 
-    products
+    results
 }
 
 pub async fn add_product(db: &DatabaseConnection, product: &Product) {

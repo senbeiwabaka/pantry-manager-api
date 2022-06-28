@@ -28,7 +28,7 @@ pub struct InventoryItem {
     pub count: u32,
     pub number_used_in_past_30_days: u32,
     pub on_grocery_list: bool,
-    pub product: Product,
+    pub product: Option<Product>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

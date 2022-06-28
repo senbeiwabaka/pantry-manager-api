@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+mod controllers;
 mod models;
 mod services;
 
@@ -19,9 +20,12 @@ use rocket::{
 };
 
 use rocket_cors::AllowedOrigins;
-use sea_orm_rocket::{Connection, Database};
+use sea_orm_rocket::Database;
 
-use crate::{models::Product, services::product_services};
+use crate::{
+    controllers::inventory_controllers, controllers::product_controllers, models::Product,
+    services::product_services,
+};
 
 #[launch]
 fn rocket() -> _ {
@@ -61,10 +65,11 @@ fn rocket() -> _ {
             "/",
             routes![
                 upc,
-                get_all_products,
-                add_product,
-                remove_product,
-                get_product
+                product_controllers::get_all_products,
+                product_controllers::add_product,
+                product_controllers::remove_product,
+                product_controllers::get_product,
+                inventory_controllers::get_all_inventory,
             ],
         )
 }
@@ -83,66 +88,6 @@ async fn upc(state: &State<AppConfig>, upc: String) -> Result<Json<Product>, Not
     dbg!(&product);
 
     Ok(Json(product))
-}
-
-#[get("/pantry-manager/products")]
-async fn get_all_products(conn: Connection<'_, Db>) -> Json<Vec<Product>> {
-    let products = product_services::get_all_products(conn).await;
-
-    dbg!(&products);
-
-    Json(products)
-}
-
-#[get("/pantry-manager/product/<upc>")]
-async fn get_product(
-    conn: Connection<'_, Db>,
-    upc: String,
-) -> Result<Json<Product>, NotFound<String>> {
-    let db = conn.into_inner();
-    let exists = repository::exists(&db, upc.clone()).await;
-
-    if !exists {
-        return Err(status::NotFound("Not Found".to_string()));
-    }
-
-    let product = product_services::get_product_by_upc(&db, &upc).await;
-
-    dbg!(&product);
-
-    Ok(Json(product))
-}
-
-#[post("/pantry-manager/product", data = "<product>")]
-async fn add_product(
-    conn: Connection<'_, Db>,
-    product: Json<Product>,
-) -> Result<Created<Product>, Conflict<String>> {
-    let db = conn.into_inner();
-    let exists = repository::exists(&db, product.upc.clone()).await;
-
-    if exists {
-        return Err(status::Conflict(Some("product already exists".to_string())));
-    }
-
-    product_services::add_product(&db, &product).await;
-
-    Ok(status::Created::new("created").body(product.into_inner()))
-}
-
-#[delete("/pantry-manager/product/<upc>")]
-async fn remove_product(
-    conn: Connection<'_, Db>,
-    upc: String,
-) -> Result<NoContent, NotFound<String>> {
-    let db = conn.into_inner();
-    let exists = repository::exists(&db, upc).await;
-
-    if !exists {
-        return Err(status::NotFound("product does not exist".to_string()));
-    }
-
-    Ok(status::NoContent)
 }
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
