@@ -1,3 +1,5 @@
+use rocket::response::Responder;
+use rocket::{response, Request, Response};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,4 +42,12 @@ pub struct GroceryListItem {
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct AppConfig {
     pub edaman_api_key: String,
+}
+
+impl<'r> Responder<'r, 'static> for Product {
+    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+        let product_as_string = serde_json::to_string(&self).unwrap();
+
+        Response::build_from(product_as_string.respond_to(&req)?).ok()
+    }
 }

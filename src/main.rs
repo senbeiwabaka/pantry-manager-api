@@ -57,13 +57,22 @@ fn rocket() -> _ {
             |rocket| async move { rocket.manage(config) },
         ))
         .attach(cors)
-        .mount("/", routes![upc, get_all_products, add_product])
+        .mount(
+            "/",
+            routes![
+                upc,
+                get_all_products,
+                add_product,
+                remove_product,
+                get_product
+            ],
+        )
 }
 
 #[get("/pantry-manager/upc-lookup/<upc>")]
 async fn upc(state: &State<AppConfig>, upc: String) -> Result<Json<Product>, NotFound<String>> {
     let app_config = state.inner();
-    let result = product_services::get_product_by_upc(&app_config.edaman_api_key, &upc).await;
+    let result = product_services::lookup_product_by_upc(&app_config.edaman_api_key, &upc).await;
     let product: Product;
 
     match result {
@@ -85,11 +94,30 @@ async fn get_all_products(conn: Connection<'_, Db>) -> Json<Vec<Product>> {
     Json(products)
 }
 
+#[get("/pantry-manager/product/<upc>")]
+async fn get_product(
+    conn: Connection<'_, Db>,
+    upc: String,
+) -> Result<Json<Product>, NotFound<String>> {
+    let db = conn.into_inner();
+    let exists = repository::exists(&db, upc.clone()).await;
+
+    if !exists {
+        return Err(status::NotFound("Not Found".to_string()));
+    }
+
+    let product = product_services::get_product_by_upc(&db, &upc).await;
+
+    dbg!(&product);
+
+    Ok(Json(product))
+}
+
 #[post("/pantry-manager/product", data = "<product>")]
 async fn add_product(
     conn: Connection<'_, Db>,
     product: Json<Product>,
-) -> Result<Created<String>, Conflict<String>> {
+) -> Result<Created<Product>, Conflict<String>> {
     let db = conn.into_inner();
     let exists = repository::exists(&db, product.upc.clone()).await;
 
@@ -99,7 +127,22 @@ async fn add_product(
 
     product_services::add_product(&db, &product).await;
 
-    Ok(status::Created::new("created"))
+    Ok(status::Created::new("created").body(product.into_inner()))
+}
+
+#[delete("/pantry-manager/product/<upc>")]
+async fn remove_product(
+    conn: Connection<'_, Db>,
+    upc: String,
+) -> Result<NoContent, NotFound<String>> {
+    let db = conn.into_inner();
+    let exists = repository::exists(&db, upc).await;
+
+    if !exists {
+        return Err(status::NotFound("product does not exist".to_string()));
+    }
+
+    Ok(status::NoContent)
 }
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {

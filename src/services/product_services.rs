@@ -1,4 +1,4 @@
-use sea_orm::{entity::*, DatabaseConnection};
+use sea_orm::{entity::*, DatabaseConnection, QueryFilter};
 use sea_orm_rocket::Connection;
 use serde::{Deserialize, Serialize};
 
@@ -43,7 +43,27 @@ pub async fn add_product(db: &DatabaseConnection, product: &Product) {
     .expect("Failed to save new product");
 }
 
-pub async fn get_product_by_upc(key: &String, upc: &String) -> Option<Product> {
+pub async fn get_product_by_upc(db: &DatabaseConnection, upc: &String) -> Product {
+    let product_entity = ProductEntity::find()
+        .filter(products::Column::Upc.like(&upc))
+        .one(db)
+        .await
+        .ok()
+        .unwrap()
+        .unwrap();
+
+    dbg!(&product_entity);
+
+    Product {
+        brand: product_entity.brand,
+        category: product_entity.category.unwrap(),
+        image_url: product_entity.image_url,
+        label: product_entity.label.unwrap(),
+        upc: product_entity.upc,
+    }
+}
+
+pub async fn lookup_product_by_upc(key: &String, upc: &String) -> Option<Product> {
     let request_url = format!(
         "https://edamam-food-and-grocery-database.p.rapidapi.com/parser?upc={}",
         upc
