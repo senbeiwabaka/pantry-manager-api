@@ -2,12 +2,12 @@ use rocket::response::Responder;
 use rocket::{response, Request, Response};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Product {
     pub upc: String,
     pub label: String,
     pub brand: Option<String>,
-    pub category: String,
+    pub category: Option<String>,
     pub image_url: Option<String>,
 }
 
@@ -15,15 +15,15 @@ impl Clone for Product {
     fn clone(&self) -> Self {
         Product {
             upc: String::from(&self.upc),
-            label: String::from(&self.upc),
-            brand: Some(String::from(&self.upc)),
-            category: String::from(&self.upc),
+            label: String::from(&self.label),
+            brand: self.brand.clone(),
+            category: self.category.clone(),
             image_url: None,
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct InventoryItem {
     pub count: u32,
     pub number_used_in_past_30_days: u32,
