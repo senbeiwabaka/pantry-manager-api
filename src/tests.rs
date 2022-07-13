@@ -81,13 +81,6 @@ async fn get_all_inventory() {
 
     inventory_services::add_inventory_item(&db, &product, 1).await;
 
-    let inventory_item = InventoryItem {
-        count: 1,
-        number_used_in_past_30_days: 0,
-        on_grocery_list: false,
-        product: Some(product.clone()),
-    };
-
     let inventory_items: Vec<InventoryItem> = vec![inventory_item];
 
     // Act
