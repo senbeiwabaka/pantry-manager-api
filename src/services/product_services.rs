@@ -18,7 +18,7 @@ pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
     for entity in entities {
         let result = Product {
             brand: entity.brand,
-            category: entity.category.unwrap(),
+            category: entity.category,
             image_url: entity.image_url,
             label: entity.label.unwrap(),
             upc: entity.upc,
@@ -33,7 +33,7 @@ pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
 pub async fn add_product(db: &DatabaseConnection, product: &Product) {
     products::ActiveModel {
         brand: Set(product.brand.to_owned()),
-        category: Set(Some(product.category.to_owned())),
+        category: Set(product.category.to_owned()),
         label: Set(Some(product.label.to_owned())),
         upc: Set(product.upc.to_owned()),
         ..Default::default()
@@ -56,7 +56,7 @@ pub async fn get_product_by_upc(db: &DatabaseConnection, upc: &String) -> Produc
 
     Product {
         brand: product_entity.brand,
-        category: product_entity.category.unwrap(),
+        category: product_entity.category,
         image_url: product_entity.image_url,
         label: product_entity.label.unwrap(),
         upc: product_entity.upc,
@@ -120,7 +120,7 @@ pub async fn lookup_product_by_upc(key: &String, upc: &String) -> Option<Product
         upc: String::from(upc),
         label: String::from(&edaman_product.hints[0].food.label),
         brand: edaman_product.hints[0].food.brand.to_owned(),
-        category: String::from(&edaman_product.hints[0].food.category),
+        category: Some(edaman_product.hints[0].food.category.to_owned()),
         image_url: edaman_product.hints[0].food.image.to_owned(),
     })
 }

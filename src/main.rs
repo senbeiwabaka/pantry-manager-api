@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate rocket;
 
+#[cfg(test)]
+mod tests;
+
 mod controllers;
 mod models;
 mod services;
@@ -70,6 +73,8 @@ fn rocket() -> _ {
                 product_controllers::remove_product,
                 product_controllers::get_product,
                 inventory_controllers::get_all_inventory,
+                inventory_controllers::get_inventory_by_upc,
+                inventory_controllers::add_inventory_item,
             ],
         )
 }

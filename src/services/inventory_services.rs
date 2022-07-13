@@ -1,13 +1,26 @@
-use repository_db::Db;
-use sea_orm::EntityTrait;
-use sea_orm_rocket::Connection;
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 
 use crate::models::{InventoryItem, Product};
 
 use entity::inventory;
 use entity::inventory::Entity as InventoryEntity;
+use entity::products::Entity as ProductEntity;
 
-pub fn add_inventory_item(product: &Product, count: u32) -> InventoryItem {
+pub async fn add_inventory_item(
+    db: &DatabaseConnection,
+    product: &Product,
+    count: u32,
+) -> InventoryItem {
+    let entity = inventory::ActiveModel {
+        count: Set(Some(count as i32)),
+        number_used_in_past_thirty_days: Set(Some(0)),
+        on_grocery_list: Set(Some(false)),
+        product_id: Set(1),
+        ..Default::default()
+    };
+
+    entity.save(db).await.unwrap();
+
     InventoryItem {
         count: count,
         number_used_in_past_30_days: 0,
@@ -16,24 +29,65 @@ pub fn add_inventory_item(product: &Product, count: u32) -> InventoryItem {
     }
 }
 
-pub async fn get_all_inventory(conn: Connection<'_, Db>) -> Vec<InventoryItem> {
-    let db = conn.into_inner();
-    let entities: Vec<inventory::Model> = InventoryEntity::find().all(db).await.ok().unwrap();
+pub async fn get_all_inventory(db: &DatabaseConnection) -> Vec<InventoryItem> {
+    let entities = InventoryEntity::find()
+        .find_also_related(ProductEntity)
+        .all(db)
+        .await
+        .ok()
+        .unwrap();
 
     dbg!(&entities);
 
     let mut results: Vec<InventoryItem> = Vec::new();
 
     for entity in entities {
+        dbg!(&entity);
+
+        let product_entity = entity.1.unwrap();
         let result = InventoryItem {
-            count: entity.count.unwrap() as u32,
-            number_used_in_past_30_days: entity.number_used_in_past_thirty_days.unwrap() as u32,
+            count: entity.0.count.unwrap() as u32,
+            number_used_in_past_30_days: entity.0.number_used_in_past_thirty_days.unwrap() as u32,
             on_grocery_list: false,
-            product: None,
+            product: Some(Product {
+                brand: product_entity.brand,
+                category: product_entity.category,
+                image_url: product_entity.image_url,
+                label: product_entity.label.unwrap_or_default(),
+                upc: product_entity.upc,
+            }),
         };
 
         results.push(result);
     }
 
     results
+}
+
+pub async fn get_inventory_by_upc(db: &DatabaseConnection, upc: &String) -> InventoryItem {
+    let entity = InventoryEntity::find()
+        .find_also_related(ProductEntity)
+        .filter(entity::products::Column::Upc.like(upc))
+        .one(db)
+        .await
+        .ok()
+        .unwrap()
+        .unwrap();
+
+    dbg!(&entity);
+
+    let product_entity = entity.1.unwrap();
+
+    InventoryItem {
+        count: entity.0.count.unwrap() as u32,
+        number_used_in_past_30_days: entity.0.number_used_in_past_thirty_days.unwrap() as u32,
+        on_grocery_list: false,
+        product: Some(Product {
+            brand: product_entity.brand,
+            category: product_entity.category,
+            image_url: product_entity.image_url,
+            label: product_entity.label.unwrap_or_default(),
+            upc: product_entity.upc,
+        }),
+    }
 }
