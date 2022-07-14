@@ -46,8 +46,16 @@ pub struct AppConfig {
 
 impl<'r> Responder<'r, 'static> for Product {
     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
-        let product_as_string = serde_json::to_string(&self).unwrap();
+        let model_as_string = serde_json::to_string(&self).unwrap();
 
-        Response::build_from(product_as_string.respond_to(&req)?).ok()
+        Response::build_from(model_as_string.respond_to(&req)?).ok()
+    }
+}
+
+impl<'r> Responder<'r, 'static> for InventoryItem {
+    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+        let model_as_string = serde_json::to_string(&self).unwrap();
+
+        Response::build_from(model_as_string.respond_to(&req)?).ok()
     }
 }

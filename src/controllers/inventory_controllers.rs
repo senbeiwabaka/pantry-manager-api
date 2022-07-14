@@ -10,6 +10,8 @@ use crate::{
     services::inventory_services,
 };
 
+use repository::repositories::inventory_repository;
+
 #[get("/pantry-manager/inventory")]
 pub async fn get_all_inventory(conn: Connection<'_, Db>) -> Json<Vec<InventoryItem>> {
     let db = conn.into_inner();
@@ -37,6 +39,15 @@ pub async fn add_inventory_item(
     product: Json<Product>,
 ) -> Result<Created<InventoryItem>, Conflict<String>> {
     let db = conn.into_inner();
+
+    let exists = inventory_repository::exists(&db, product.upc.clone()).await;
+
+    if exists {
+        return Err(status::Conflict(Some(
+            "inventory already exists".to_string(),
+        )));
+    }
+
     let inventory_item = inventory_services::add_inventory_item(&db, &product, count).await;
     let json_result = Json(inventory_item);
 
