@@ -7,6 +7,8 @@ use sea_orm_rocket::Connection;
 
 use crate::{models::Product, services::product_services};
 
+use repository::repositories::product_repository;
+
 #[get("/pantry-manager/products")]
 pub async fn get_all_products(conn: Connection<'_, Db>) -> Json<Vec<Product>> {
     let products = product_services::get_all_products(conn).await;
@@ -22,7 +24,7 @@ pub async fn get_product(
     upc: String,
 ) -> Result<Json<Product>, NotFound<String>> {
     let db = conn.into_inner();
-    let exists = repository::exists(&db, upc.clone()).await;
+    let exists = product_repository::exists(&db, upc.clone()).await;
 
     if !exists {
         return Err(status::NotFound("Not Found".to_string()));
@@ -41,7 +43,7 @@ pub async fn add_product(
     product: Json<Product>,
 ) -> Result<Created<Product>, Conflict<String>> {
     let db = conn.into_inner();
-    let exists = repository::exists(&db, product.upc.clone()).await;
+    let exists = product_repository::exists(&db, product.upc.clone()).await;
 
     if exists {
         return Err(status::Conflict(Some("product already exists".to_string())));
@@ -58,7 +60,7 @@ pub async fn remove_product(
     upc: String,
 ) -> Result<NoContent, NotFound<String>> {
     let db = conn.into_inner();
-    let exists = repository::exists(&db, upc).await;
+    let exists = product_repository::exists(&db, upc).await;
 
     if !exists {
         return Err(status::NotFound("product does not exist".to_string()));

@@ -2,13 +2,15 @@ use entity::products;
 use rocket::async_test;
 use sea_orm::{entity::prelude::*, ConnectionTrait, Database, DbBackend, Schema, Set};
 
+use crate::repositories::product_repository;
+
 #[async_test]
 async fn product_should_not_exist() {
     // Arrange
     let db = Database::connect("sqlite::memory:").await.unwrap();
 
     // Act
-    let result = crate::exists(&db, "upc".to_string()).await;
+    let result = product_repository::exists(&db, "upc".to_string()).await;
 
     // Assert
     assert!(!result);
@@ -30,7 +32,7 @@ async fn product_should_exist() {
     entity.save(&db).await.unwrap();
 
     // Act
-    let result = crate::exists(&db, "upc".to_string()).await;
+    let result = product_repository::exists(&db, "upc".to_string()).await;
 
     // Assert
     assert!(result);
