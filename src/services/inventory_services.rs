@@ -4,6 +4,7 @@ use crate::models::{InventoryItem, Product};
 
 use entity::inventory;
 use entity::inventory::Entity as InventoryEntity;
+use entity::products;
 use entity::products::Entity as ProductEntity;
 
 pub async fn add_inventory_item(
@@ -11,11 +12,18 @@ pub async fn add_inventory_item(
     product: &Product,
     count: u32,
 ) -> InventoryItem {
+    let product_entity = ProductEntity::find()
+        .filter(products::Column::Upc.like(&product.upc.to_owned()))
+        .one(db)
+        .await
+        .ok()
+        .unwrap()
+        .unwrap();
     let entity = inventory::ActiveModel {
         count: Set(Some(count as i32)),
         number_used_in_past_thirty_days: Set(Some(0)),
         on_grocery_list: Set(Some(false)),
-        product_id: Set(1),
+        product_id: Set(product_entity.id),
         ..Default::default()
     };
 

@@ -30,21 +30,15 @@ pub async fn get_inventory_by_upc(conn: Connection<'_, Db>, upc: String) -> Json
     Json(inventory)
 }
 
-#[post("/pantry-manager/inventory/<count>")]
+#[post("/pantry-manager/inventory/<count>", data = "<product>")]
 pub async fn add_inventory_item(
     conn: Connection<'_, Db>,
     count: u32,
-) -> Result<Created<String>, Conflict<String>> {
-    let product = Product {
-        brand: None,
-        category: None,
-        image_url: None,
-        label: "".to_string(),
-        upc: "".to_string(),
-    };
-
+    product: Json<Product>,
+) -> Result<Created<InventoryItem>, Conflict<String>> {
     let db = conn.into_inner();
-    inventory_services::add_inventory_item(&db, &product, count).await;
+    let inventory_item = inventory_services::add_inventory_item(&db, &product, count).await;
+    let json_result = Json(inventory_item);
 
-    Ok(status::Created::new("created").body("test".to_string()))
+    Ok(status::Created::new("created").body(json_result.into_inner()))
 }
