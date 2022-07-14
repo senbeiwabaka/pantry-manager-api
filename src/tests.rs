@@ -99,10 +99,11 @@ async fn get_inventory_by_upc() {
 
     let upc: String = "upc".to_string();
 
-    let product_entity = get_product_entity(&upc);
-
-    // This is a test so if this fails that is fine. We have a bigger problem with the setup
-    product_entity.save(&db).await.unwrap();
+    get_product_entity(&upc).save(&db).await.unwrap_or_default();
+    get_product_entity(&"upc 1".to_string())
+        .save(&db)
+        .await
+        .unwrap_or_default();
 
     let product = get_product(&upc);
 
@@ -115,12 +116,10 @@ async fn get_inventory_by_upc() {
 
     inventory_services::add_inventory_item(&db, &product, 1).await;
 
-    let product1 = get_product(&"upc 1".to_string());
-
-    inventory_services::add_inventory_item(&db, &product1, 3).await;
+    inventory_services::add_inventory_item(&db, &get_product(&"upc 1".to_string()), 3).await;
 
     // Act
-    let result = inventory_services::get_inventory_by_upc(&db, &"upc".to_owned()).await;
+    let result = inventory_services::get_inventory_by_upc(&db, &upc).await;
 
     // Assert
     assert_eq!(inventory_item, result);
