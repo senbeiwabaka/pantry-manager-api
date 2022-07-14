@@ -6,7 +6,7 @@ COPY ./ .
 
 RUN cargo build --release
 
-FROM alpine:latest
+FROM debian:buster-slim
 
 WORKDIR /app
 
@@ -17,4 +17,4 @@ RUN ls /app
 
 EXPOSE 8000
 
-ENTRYPOINT  ["pantry-manager-api"]
+ENTRYPOINT  ["./pantry-manager-api"]
