@@ -11,6 +11,7 @@ FROM rust:latest
 WORKDIR /app
 
 COPY --from=builder /src/Rocket.toml /app
+COPY --from=builder /src/Pantry.toml /app
 COPY --from=builder /src/target/release/* /app/
 
 RUN ls /app

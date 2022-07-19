@@ -33,16 +33,12 @@ use crate::{
 #[launch]
 fn rocket() -> _ {
     let figment = Figment::new()
-        .merge(Toml::file("Rocket.toml"))
-        .merge(Env::prefixed("PANTRY_API_"))
-        .select(Profile::from_env_or(
-            "ROCKET_PROFILE",
-            Config::DEBUG_PROFILE,
-        ));
-
+        .merge(Toml::file("Pantry.toml"))
+        .merge(Env::prefixed("PANTRY_API_"));
+        
     dbg!(&figment);
 
-    let config: AppConfig = figment.focus("pantry_manager_api").extract().unwrap();
+    let config: AppConfig = figment.extract().unwrap();
 
     dbg!(&config);
 
