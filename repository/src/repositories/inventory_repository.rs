@@ -5,7 +5,7 @@ use entity::inventory::Entity as InventoryItemEntity;
 use entity::products;
 use entity::products::Entity as ProductEntity;
 
-pub async fn exists(db: &DatabaseConnection, upc: String) -> bool {
+pub async fn exists(db: &DatabaseConnection, upc: &String) -> bool {
     let product_entity = ProductEntity::find()
         .filter(products::Column::Upc.like(&upc))
         .one(db)

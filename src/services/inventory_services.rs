@@ -30,7 +30,7 @@ pub async fn add_inventory_item(
     entity.save(db).await.unwrap();
 
     InventoryItem {
-        count: count,
+        count,
         number_used_in_past_30_days: 0,
         on_grocery_list: false,
         product: Some(product.clone()),
@@ -98,4 +98,29 @@ pub async fn get_inventory_by_upc(db: &DatabaseConnection, upc: &String) -> Inve
             upc: product_entity.upc,
         }),
     }
+}
+
+pub async fn update_inventory_item(db: &DatabaseConnection, inventory_item: &InventoryItem) {
+    let model: Option<inventory::Model> = InventoryEntity::find()
+        .filter(
+            entity::products::Column::Upc.like(
+                inventory_item
+                    .product
+                    .as_ref()
+                    .unwrap()
+                    .upc
+                    .clone()
+                    .as_str(),
+            ),
+        )
+        .one(db)
+        .await
+        .ok()
+        .unwrap();
+
+    let mut entity: inventory::ActiveModel = model.unwrap().into();
+
+    entity.count = Set(Some(inventory_item.count as i32));
+
+    entity.update(db).await;
 }

@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate rocket;
+extern crate sea_orm_rocket;
 
 #[cfg(test)]
 mod tests;
@@ -15,14 +16,18 @@ use rocket::{
     fairing::{self, AdHoc},
     figment::{
         providers::{Env, Format, Toml},
-        Figment, Profile,
+        Figment,
     },
     response::status::{self, *},
     serde::json::Json,
-    Build, Config, Rocket, State,
+    Build, Rocket, State,
 };
 
 use rocket_cors::AllowedOrigins;
+use rocket_okapi::{
+    openapi, openapi_get_routes,
+    swagger_ui::{make_swagger_ui, SwaggerUIConfig},
+};
 use sea_orm_rocket::Database;
 
 use crate::{
@@ -35,7 +40,7 @@ fn rocket() -> _ {
     let figment = Figment::new()
         .merge(Toml::file("Pantry.toml"))
         .merge(Env::prefixed("PANTRY_API_"));
-        
+
     dbg!(&figment);
 
     let config: AppConfig = figment.extract().unwrap();
@@ -62,7 +67,7 @@ fn rocket() -> _ {
         .attach(cors)
         .mount(
             "/",
-            routes![
+            openapi_get_routes![
                 upc,
                 product_controllers::get_all_products,
                 product_controllers::add_product,
@@ -71,10 +76,13 @@ fn rocket() -> _ {
                 inventory_controllers::get_all_inventory,
                 inventory_controllers::get_inventory_by_upc,
                 inventory_controllers::add_inventory_item,
+                inventory_controllers::update_inventory_item,
             ],
         )
+        .mount("/swagger", make_swagger_ui(&get_docs()))
 }
 
+#[openapi]
 #[get("/pantry-manager/upc-lookup/<upc>")]
 async fn upc(state: &State<AppConfig>, upc: String) -> Result<Json<Product>, NotFound<String>> {
     let app_config = state.inner();
@@ -89,6 +97,13 @@ async fn upc(state: &State<AppConfig>, upc: String) -> Result<Json<Product>, Not
     dbg!(&product);
 
     Ok(Json(product))
+}
+
+fn get_docs() -> SwaggerUIConfig {
+    SwaggerUIConfig {
+        url: "/openapi.json".to_string(),
+        ..Default::default()
+    }
 }
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {

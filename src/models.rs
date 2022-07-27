@@ -1,8 +1,9 @@
 use rocket::response::Responder;
 use rocket::{response, Request, Response};
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, JsonSchema)]
 pub struct Product {
     pub upc: String,
     pub label: String,
@@ -23,7 +24,7 @@ impl Clone for Product {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 pub struct InventoryItem {
     pub count: u32,
     pub number_used_in_past_30_days: u32,

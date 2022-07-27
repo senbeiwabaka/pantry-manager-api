@@ -1,14 +1,13 @@
 use sea_orm::{entity::*, DatabaseConnection, QueryFilter};
-use sea_orm_rocket::Connection;
+
 use serde::{Deserialize, Serialize};
 
-use crate::{models::Product, Db};
+use crate::models::Product;
 
 use entity::products;
 use entity::products::Entity as ProductEntity;
 
-pub async fn get_all_products(conn: Connection<'_, Db>) -> Vec<Product> {
-    let db = conn.into_inner();
+pub async fn get_all_products(db: &DatabaseConnection) -> Vec<Product> {
     let entities: Vec<products::Model> = ProductEntity::find().all(db).await.ok().unwrap();
 
     dbg!(&entities);
