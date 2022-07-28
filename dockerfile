@@ -14,8 +14,6 @@ COPY --from=builder /src/Rocket.toml /app
 COPY --from=builder /src/Pantry.toml /app
 COPY --from=builder /src/target/release/* /app/
 
-RUN ls /app
-
 EXPOSE 8000
 
 ENTRYPOINT  ["./pantry-manager-api"]
