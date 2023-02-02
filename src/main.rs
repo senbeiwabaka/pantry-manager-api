@@ -41,12 +41,7 @@ fn rocket() -> _ {
         .merge(Toml::file("Pantry.toml"))
         .merge(Env::prefixed("PANTRY_API_"));
 
-    dbg!(&figment);
-
     let config: AppConfig = figment.extract().unwrap();
-
-    dbg!(&config);
-
     let allowed_origins = AllowedOrigins::All;
     let cors = rocket_cors::CorsOptions {
         allowed_origins,
@@ -62,7 +57,10 @@ fn rocket() -> _ {
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
         .attach(AdHoc::on_ignite(
             "Application Config",
-            |rocket| async move { rocket.manage(config) },
+            |rocket| async move {
+                dbg!(rocket.figment());
+                rocket.manage(config)
+            },
         ))
         .attach(cors)
         .mount(
