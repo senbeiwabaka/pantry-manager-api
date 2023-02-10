@@ -3,3 +3,4 @@ url = "postgres://postgres:mysecretpassword@docker-database.localdomain/pantry_t
 
 [default]
 log_level = "debug"
+address = "0.0.0.0"
