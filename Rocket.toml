@@ -1,5 +1,5 @@
 [default.databases.pantry_manager]
-url = "postgres://postgres:mysecretpassword@docker-database.localdomain:5432/pantry_test"
+url = "postgres://postgres:mysecretpassword@docker-database.localdomain/pantry_test"
 
 [default]
 log_level = "debug"
