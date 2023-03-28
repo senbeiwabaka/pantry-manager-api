@@ -84,7 +84,13 @@ fn rocket() -> _ {
 #[get("/pantry-manager/upc-lookup/<upc>")]
 async fn upc(state: &State<AppConfig>, upc: String) -> Result<Json<Product>, NotFound<String>> {
     let app_config = state.inner();
-    let result = product_services::lookup_product_by_upc(&app_config.edaman_api_key, &upc).await;
+    let result = product_services::lookup_product_by_upc(
+        &app_config.edaman_api_uri,
+        &app_config.edaman_app_id,
+        &app_config.edaman_app_key,
+        &upc,
+    )
+    .await;
     let product: Product;
 
     match result {

@@ -22,13 +22,23 @@ pub async fn get_all_inventory(state: &State<Db>) -> Json<Vec<InventoryItem>> {
 
 #[openapi]
 #[get("/pantry-manager/inventory/<upc>")]
-pub async fn get_inventory_by_upc(state: &State<Db>, upc: String) -> Json<InventoryItem> {
+pub async fn get_inventory_by_upc(
+    state: &State<Db>,
+    upc: String,
+) -> Result<Json<InventoryItem>, Status> {
     let db = state.inner();
+
+    let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
+
+    if !exists {
+        return Err(Status::NotFound);
+    }
+
     let inventory = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;
 
     dbg!(&inventory);
 
-    Json(inventory)
+    Ok(Json(inventory))
 }
 
 #[openapi]
@@ -39,7 +49,7 @@ pub async fn add_inventory_item(
 ) -> Result<(Status, Json<InventoryItem>), Status> {
     let db = state.inner();
 
-    let exists = inventory_repository::exists(&db.conn, &product.upc).await;
+    let exists = inventory_repository::exists(&db.conn, product.upc.clone()).await;
 
     if exists {
         return Err(Status::Conflict);
@@ -58,10 +68,10 @@ pub async fn add_inventory_item(
 pub async fn update_inventory_item(state: &State<Db>, inventory: Json<InventoryItem>) -> Status {
     let db = state.inner();
     let upc: String = inventory.product.clone().unwrap().upc.clone();
-    let exists = inventory_repository::exists(&db.conn, &upc).await;
+    let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
 
     if !exists {
-        return Status::Conflict;
+        return Status::NotFound;
     }
 
     let inventory_item = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;

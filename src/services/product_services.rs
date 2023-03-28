@@ -62,20 +62,22 @@ pub async fn get_product_by_upc(db: &DatabaseConnection, upc: &String) -> Produc
     }
 }
 
-pub async fn lookup_product_by_upc(key: &String, upc: &String) -> Option<Product> {
-    let request_url = format!(
-        "https://edamam-food-and-grocery-database.p.rapidapi.com/parser?upc={}",
-        upc
-    );
+pub async fn lookup_product_by_upc(
+    uri: &String,
+    app_id: &String,
+    app_key: &String,
+    upc: &String,
+) -> Option<Product> {
+    let request_url = format!("{}?app_id={}&app_key={}&upc={}", uri, app_id, app_key, upc);
 
     let client = reqwest::Client::new();
     let response = client
         .get(request_url)
-        .header(
-            "x-rapidapi-host",
-            "edamam-food-and-grocery-database.p.rapidapi.com",
-        )
-        .header("x-rapidapi-key", key)
+        // .header(
+        //     "x-rapidapi-host",
+        //     "edamam-food-and-grocery-database.p.rapidapi.com",
+        // )
+        // .header("x-rapidapi-key", key)
         // confirm the request using send()
         .send()
         .await

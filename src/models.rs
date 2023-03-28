@@ -42,7 +42,9 @@ pub struct GroceryListItem {
 
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct AppConfig {
-    pub edaman_api_key: String,
+    pub edaman_api_uri: String,
+    pub edaman_app_id: String,
+    pub edaman_app_key: String,
 }
 
 impl<'r> Responder<'r, 'static> for Product {
