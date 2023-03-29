@@ -80,3 +80,18 @@ pub async fn update_inventory_item(state: &State<Db>, inventory: Json<InventoryI
 
     Status::NoContent
 }
+
+#[openapi]
+#[post("/pantry-manager/inventory/<upc>/<count>")]
+pub async fn update_inventory_count(state: &State<Db>, upc: String, count: i32) -> Status {
+    let db = state.inner();
+    let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
+
+    if !exists {
+        return Status::NotFound;
+    }
+
+    inventory_services::update_inventory_count(&db.conn, &upc, count).await;
+
+    Status::NoContent
+}

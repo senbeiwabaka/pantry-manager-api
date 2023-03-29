@@ -45,13 +45,9 @@ pub async fn get_all_inventory(db: &DatabaseConnection) -> Vec<InventoryItem> {
         .ok()
         .unwrap();
 
-    dbg!(&entities);
-
     let mut results: Vec<InventoryItem> = Vec::new();
 
     for entity in entities {
-        dbg!(&entity);
-
         let product_entity = entity.1.unwrap();
         let result = InventoryItem {
             count: entity.0.count.unwrap() as u32,
@@ -81,8 +77,6 @@ pub async fn get_inventory_by_upc(db: &DatabaseConnection, upc: &String) -> Inve
         .ok()
         .unwrap()
         .unwrap();
-
-    dbg!(&entity);
 
     let product_entity = entity.1.unwrap();
 
@@ -121,6 +115,31 @@ pub async fn update_inventory_item(db: &DatabaseConnection, inventory_item: &Inv
     let mut entity: inventory::ActiveModel = model.unwrap().into();
 
     entity.count = Set(Some(inventory_item.count as i32));
+
+    entity.update(db).await;
+}
+
+pub async fn update_inventory_count(db: &DatabaseConnection, upc: &String, count: i32) {
+    let model = InventoryEntity::find()
+        .find_also_related(ProductEntity)
+        .filter(entity::products::Column::Upc.like(upc))
+        .one(db)
+        .await
+        .ok()
+        .unwrap();
+
+    let mut entity: inventory::ActiveModel = model.unwrap().0.into();
+
+    let mut new_count = match entity.count.unwrap() {
+        Some(x) => x,
+        _ => 0,
+    } + count;
+
+    if new_count < 0 {
+        new_count = 0;
+    }
+
+    entity.count = Set(Some(new_count));
 
     entity.update(db).await;
 }
