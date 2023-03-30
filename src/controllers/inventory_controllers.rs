@@ -3,19 +3,21 @@ use rocket::{http::Status, serde::json::Json, State};
 use rocket_okapi::openapi;
 
 use crate::{
-    models::{InventoryItem, Product},
+    models::{InventoryItem, Paged, Product},
     services::inventory_services,
 };
 
 use repository::repositories::inventory_repository;
 
 #[openapi]
-#[get("/pantry-manager/inventory")]
-pub async fn get_all_inventory(state: &State<Db>) -> Json<Vec<InventoryItem>> {
+#[get("/pantry-manager/inventory?<page>&<length>")]
+pub async fn get_all_inventory(
+    state: &State<Db>,
+    page: Option<u64>,
+    length: Option<u64>,
+) -> Json<Paged<InventoryItem>> {
     let db = state.inner();
-    let inventory = inventory_services::get_all_inventory(&db.conn).await;
-
-    dbg!(&inventory);
+    let inventory = inventory_services::get_all_inventory(&db.conn, page, length).await;
 
     Json(inventory)
 }
@@ -36,8 +38,6 @@ pub async fn get_inventory_by_upc(
 
     let inventory = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;
 
-    dbg!(&inventory);
-
     Ok(Json(inventory))
 }
 
@@ -48,7 +48,6 @@ pub async fn add_inventory_item(
     product: Json<Product>,
 ) -> Result<(Status, Json<InventoryItem>), Status> {
     let db = state.inner();
-
     let exists = inventory_repository::exists(&db.conn, product.upc.clone()).await;
 
     if exists {
@@ -56,42 +55,48 @@ pub async fn add_inventory_item(
     }
 
     let inventory_item = inventory_services::add_inventory_item(&db.conn, &product, 1).await;
-    let json_result = Json(inventory_item);
 
-    // Ok(status::Created::new("created").body(json_result.into_inner()))
-
-    Ok((Status::Created, json_result))
+    Ok((Status::Created, Json(inventory_item)))
 }
 
 #[openapi]
 #[put("/pantry-manager/inventory", data = "<inventory>")]
-pub async fn update_inventory_item(state: &State<Db>, inventory: Json<InventoryItem>) -> Status {
+pub async fn update_inventory_item(
+    state: &State<Db>,
+    inventory: Json<InventoryItem>,
+) -> Result<Json<InventoryItem>, Status> {
     let db = state.inner();
     let upc: String = inventory.product.clone().unwrap().upc.clone();
     let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
 
     if !exists {
-        return Status::NotFound;
+        return Err(Status::NotFound);
     }
+
+    inventory_services::update_inventory_item(&db.conn, &inventory).await;
 
     let inventory_item = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;
 
-    inventory_services::update_inventory_item(&db.conn, &inventory_item).await;
-
-    Status::NoContent
+    Ok(Json(inventory_item))
 }
 
 #[openapi]
 #[post("/pantry-manager/inventory/<upc>/<count>")]
-pub async fn update_inventory_count(state: &State<Db>, upc: String, count: i32) -> Status {
+pub async fn update_inventory_count(
+    state: &State<Db>,
+    upc: String,
+    count: i32,
+) -> Result<Json<InventoryItem>, Status> {
     let db = state.inner();
     let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
 
     if !exists {
-        return Status::NotFound;
+        return Err(Status::NotFound);
     }
 
     inventory_services::update_inventory_count(&db.conn, &upc, count).await;
 
-    Status::NoContent
+    let inventory_item = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;
+
+    Ok(Json(inventory_item))
 }

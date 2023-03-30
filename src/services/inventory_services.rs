@@ -1,6 +1,9 @@
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
+    QuerySelect, Set,
+};
 
-use crate::models::{InventoryItem, Product};
+use crate::models::{InventoryItem, Paged, Product};
 
 use entity::inventory;
 use entity::inventory::Entity as InventoryEntity;
@@ -37,12 +40,31 @@ pub async fn add_inventory_item(
     }
 }
 
-pub async fn get_all_inventory(db: &DatabaseConnection) -> Vec<InventoryItem> {
+pub async fn get_all_inventory(
+    db: &DatabaseConnection,
+    page: Option<u64>,
+    length: Option<u64>,
+) -> Paged<InventoryItem> {
+    let count: usize = InventoryEntity::find()
+        .find_also_related(ProductEntity)
+        .count(db)
+        .await
+        .unwrap();
+    let page_value = match page {
+        Some(x) => x,
+        _ => 0,
+    };
+    let langth_value = match length {
+        Some(x) => x,
+        _ => 10,
+    };
+
     let entities = InventoryEntity::find()
         .find_also_related(ProductEntity)
+        .limit(langth_value)
+        .offset(page_value)
         .all(db)
         .await
-        .ok()
         .unwrap();
 
     let mut results: Vec<InventoryItem> = Vec::new();
@@ -65,7 +87,12 @@ pub async fn get_all_inventory(db: &DatabaseConnection) -> Vec<InventoryItem> {
         results.push(result);
     }
 
-    results
+    let paged_data = Paged::<InventoryItem> {
+        count,
+        data: results,
+    };
+
+    paged_data
 }
 
 pub async fn get_inventory_by_upc(db: &DatabaseConnection, upc: &String) -> InventoryItem {

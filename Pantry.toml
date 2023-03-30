@@ -1,1 +1,3 @@
-edaman_api_key = ""
+edaman_api_uri = "https://api.edamam.com/api/food-database/v2/parser"
+edaman_app_id = ""
+edaman_app_key = ""

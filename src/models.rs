@@ -40,6 +40,21 @@ pub struct GroceryListItem {
     pub inventory_item: InventoryItem,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
+pub struct Paged<T> {
+    pub count: usize,
+    pub data: Vec<T>,
+}
+
+impl<T> Paged<T> {
+    pub const fn new() -> Self {
+        Paged {
+            count: 0,
+            data: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct AppConfig {
     pub edaman_api_uri: String,

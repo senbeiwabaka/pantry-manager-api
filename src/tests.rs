@@ -7,6 +7,7 @@ use sea_orm::Set;
 use sea_orm::{DbBackend, DbConn, Schema};
 
 use crate::models::InventoryItem;
+use crate::models::Paged;
 use crate::models::Product;
 use crate::services::inventory_services;
 
@@ -47,13 +48,13 @@ async fn get_all_inventory_none() {
 
     setup_schema(&db).await;
 
-    let inventory_item: Vec<InventoryItem> = Vec::new();
+    let expected: Paged<InventoryItem> = Paged::new();
 
     // Act
-    let result = inventory_services::get_all_inventory(&db).await;
+    let result = inventory_services::get_all_inventory(&db, None, None).await;
 
     // Assert
-    assert_eq!(inventory_item, result);
+    assert_eq!(expected, result);
 }
 
 #[async_test]
@@ -81,13 +82,17 @@ async fn get_all_inventory() {
 
     inventory_services::add_inventory_item(&db, &product, 1).await;
 
-    let inventory_items: Vec<InventoryItem> = vec![inventory_item];
+    let expected: Paged<InventoryItem> = Paged::<InventoryItem> {
+        count: 1,
+        data: vec![inventory_item],
+    };
 
     // Act
-    let result = inventory_services::get_all_inventory(&db).await;
+    let result = inventory_services::get_all_inventory(&db, None, None).await;
 
     // Assert
-    assert_eq!(inventory_items, result);
+    assert_eq!(expected.count, result.count);
+    assert_eq!(expected.data, result.data);
 }
 
 #[async_test]
