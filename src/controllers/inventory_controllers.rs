@@ -29,7 +29,6 @@ pub async fn get_inventory_by_upc(
     upc: String,
 ) -> Result<Json<InventoryItem>, Status> {
     let db = state.inner();
-
     let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
 
     if !exists {

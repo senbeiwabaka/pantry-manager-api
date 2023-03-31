@@ -41,6 +41,7 @@ pub struct GroceryListItem {
     pub standard_quantity: Option<u32>,
     pub upc: String,
     pub label: String,
+    pub count: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]

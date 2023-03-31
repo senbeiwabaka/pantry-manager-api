@@ -3,7 +3,7 @@ use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QuerySelect, RelationTrait,
 };
 
-use crate::models::{GroceryListItem, Paged};
+use crate::models::{GroceryListItem, Paged, InventoryItem};
 
 use entity::grocery::Entity as GroceryEntity;
 
@@ -21,6 +21,7 @@ pub async fn get_all_groceries(
             JoinType::LeftJoin,
             entity::inventory::Relation::Products.def(),
         )
+        .select_only()
         .count(db)
         .await
         .unwrap();
@@ -46,6 +47,7 @@ pub async fn get_all_groceries(
             entity::grocery::Column::Quantity.if_null(0 as u32),
             "quantity",
         )
+        .column_as(entity::inventory::Column::Count.if_null(0 as u32), "count")
         .join(
             JoinType::RightJoin,
             entity::grocery::Relation::Inventory.def(),
@@ -92,3 +94,4 @@ pub async fn get_all_groceries(
 
     paged_data
 }
+
