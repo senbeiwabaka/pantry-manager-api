@@ -1,6 +1,7 @@
 use rocket::response::Responder;
 use rocket::{response, Request, Response};
 use rocket_okapi::JsonSchema;
+use sea_orm::FromQueryResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, JsonSchema)]
@@ -32,12 +33,14 @@ pub struct InventoryItem {
     pub product: Option<Product>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+// Model representing Groceries, Inventory, and Products.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, FromQueryResult)]
 pub struct GroceryListItem {
-    pub quantity: u32,
-    pub shopped: bool,
-    pub standard_quantity: u32,
-    pub inventory_item: InventoryItem,
+    pub quantity: Option<u32>,
+    pub shopped: Option<bool>,
+    pub standard_quantity: Option<u32>,
+    pub upc: String,
+    pub label: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]

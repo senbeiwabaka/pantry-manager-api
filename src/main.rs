@@ -31,8 +31,8 @@ use rocket_okapi::{
 use sea_orm_rocket::Database;
 
 use crate::{
-    controllers::inventory_controllers, controllers::product_controllers, models::Product,
-    services::product_services,
+    controllers::grocery_controllers, controllers::inventory_controllers,
+    controllers::product_controllers, models::Product, services::product_services,
 };
 
 #[launch]
@@ -76,6 +76,7 @@ fn rocket() -> _ {
                 inventory_controllers::add_inventory_item,
                 inventory_controllers::update_inventory_item,
                 inventory_controllers::update_inventory_count,
+                grocery_controllers::get_all_groceries,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_docs()))
