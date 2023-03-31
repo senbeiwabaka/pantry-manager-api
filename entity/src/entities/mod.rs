@@ -2,6 +2,7 @@
 
 pub mod prelude;
 
+pub mod grocery;
 pub mod inventory;
 pub mod products;
 pub mod seaql_migrations;

@@ -1,4 +1,4 @@
-Cargo watch and sea-orm-cli are suggested. Watch to run the program while also making live changes. sea-orm-cli to manage the entities and migrations.
+[Cargo watch](https://github.com/watchexec/cargo-watch) and [sea-orm-cli](https://www.sea-ql.org/SeaORM/docs/generate-entity/sea-orm-cli/) are suggested. Watch to run the program while also making live changes. sea-orm-cli to manage the entities and migrations.
 
 Libraries used:
 * rocket

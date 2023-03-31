@@ -23,11 +23,19 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     Products,
+    #[sea_orm(has_many = "super::grocery::Entity")]
+    Grocery,
 }
 
 impl Related<super::products::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Products.def()
+    }
+}
+
+impl Related<super::grocery::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Grocery.def()
     }
 }
 
