@@ -65,7 +65,7 @@ pub async fn update_inventory_item(
     inventory: Json<InventoryItem>,
 ) -> Result<Json<InventoryItem>, Status> {
     let db = state.inner();
-    let upc: String = inventory.product.clone().unwrap().upc.clone();
+    let upc: String = inventory.product.clone().upc.clone();
     let exists = inventory_repository::exists(&db.conn, upc.clone()).await;
 
     if !exists {
@@ -93,9 +93,11 @@ pub async fn update_inventory_count(
         return Err(Status::NotFound);
     }
 
-    inventory_services::update_inventory_count(&db.conn, &upc, count).await;
+    if inventory_services::update_inventory_count(&db.conn, &upc, count).await {
+        let inventory_item = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;
 
-    let inventory_item = inventory_services::get_inventory_by_upc(&db.conn, &upc).await;
+        return Ok(Json(inventory_item));
+    }
 
-    Ok(Json(inventory_item))
+    Err(Status::InternalServerError)
 }

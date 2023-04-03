@@ -31,7 +31,7 @@ async fn add_inventory_item() {
         count: 1,
         number_used_in_past_30_days: 0,
         on_grocery_list: false,
-        product: Some(product.clone()),
+        product: product.clone(),
     };
 
     // Act
@@ -77,7 +77,7 @@ async fn get_all_inventory() {
         count: 1,
         number_used_in_past_30_days: 0,
         on_grocery_list: false,
-        product: Some(product.clone()),
+        product: product.clone(),
     };
 
     inventory_services::add_inventory_item(&db, &product, 1).await;
@@ -116,7 +116,7 @@ async fn get_inventory_by_upc() {
         count: 1,
         number_used_in_past_30_days: 0,
         on_grocery_list: false,
-        product: Some(product.clone()),
+        product: product.clone(),
     };
 
     inventory_services::add_inventory_item(&db, &product, 1).await;

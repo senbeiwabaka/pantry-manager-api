@@ -1,11 +1,15 @@
 use migration::JoinType;
 use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QuerySelect, RelationTrait,
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
+    QuerySelect, RelationTrait, Set,
 };
 
-use crate::models::{GroceryListItem, Paged, InventoryItem};
+use crate::models::{GroceryListItem, InventoryItemProduct, Paged};
 
+use entity::grocery;
 use entity::grocery::Entity as GroceryEntity;
+use entity::inventory::Entity as InventoryEntity;
+use entity::products::Entity as ProductEntity;
 
 pub async fn get_all_groceries(
     db: &DatabaseConnection,
@@ -63,30 +67,6 @@ pub async fn get_all_groceries(
         .await
         .unwrap();
 
-    // let mut results: Vec<GroceryListItem> = Vec::new();
-
-    // for entity in entities {
-    //     let grocery_item = entity.0.to_owned();
-    //     let inventor_item = entity.1.to_owned();
-
-    //     let result = GroceryListItem {
-    //         quantity: grocery_item.quantity.unwrap() as u32,
-    //         shopped: grocery_item.shopped.unwrap_or_default(),
-    //         standard_quantity: grocery_item.standard_quantity.unwrap() as u32,
-    //         inventory_item: match inventor_item {
-    //             Some(x) => Some(InventoryItem {
-    //                 count: x.count.unwrap() as u32,
-    //                 number_used_in_past_30_days: x.number_used_in_past_thirty_days.unwrap() as u32,
-    //                 on_grocery_list: false,
-    //                 product: None,
-    //             }),
-    //             _ => None,
-    //         },
-    //     };
-
-    //     results.push(result);
-    // }
-
     let paged_data = Paged::<GroceryListItem> {
         count,
         data: entities,
@@ -95,3 +75,112 @@ pub async fn get_all_groceries(
     paged_data
 }
 
+pub async fn get_grocery_listen_item(
+    db: &DatabaseConnection,
+    upc: &String,
+) -> Option<GroceryListItem> {
+    let entity = GroceryEntity::find()
+        .filter(entity::products::Column::Upc.like(upc))
+        .select_only()
+        .column(entity::products::Column::Upc)
+        .column(entity::products::Column::Label)
+        .column_as(
+            entity::grocery::Column::StandardQuantity.if_null(0 as u32),
+            "standard_quantity",
+        )
+        .column_as(entity::grocery::Column::Shopped.if_null(false), "shopped")
+        .column_as(
+            entity::grocery::Column::Quantity.if_null(0 as u32),
+            "quantity",
+        )
+        .column_as(entity::inventory::Column::Count.if_null(0 as u32), "count")
+        .join(
+            JoinType::RightJoin,
+            entity::grocery::Relation::Inventory.def(),
+        )
+        .join(
+            JoinType::LeftJoin,
+            entity::inventory::Relation::Products.def(),
+        )
+        .into_model::<GroceryListItem>()
+        .one(db)
+        .await
+        .unwrap();
+
+    entity
+}
+
+pub async fn add_grocery_list_item(
+    db: &DatabaseConnection,
+    upc: &String,
+    standard_quantity: u32,
+) -> GroceryListItem {
+    let invetory_item_entity = InventoryEntity::find()
+        .filter(entity::products::Column::Upc.like(upc))
+        .select_only()
+        .column(entity::products::Column::Upc)
+        .column(entity::products::Column::Label)
+        .column_as(entity::inventory::Column::Count.if_null(0 as u32), "count")
+        .column_as(entity::inventory::Column::Id, "inventory_item_id")
+        .join(
+            JoinType::LeftJoin,
+            entity::inventory::Relation::Products.def(),
+        )
+        .into_model::<InventoryItemProduct>()
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap();
+    let entity = grocery::ActiveModel {
+        shopped: Set(Some(false)),
+        standard_quantity: Set(Some(standard_quantity as i32)),
+        inventory_item_id: Set(invetory_item_entity.inventory_item_id),
+        ..Default::default()
+    };
+
+    entity.save(db).await.unwrap();
+
+    GroceryListItem {
+        quantity: None,
+        shopped: Some(false),
+        standard_quantity: Some(standard_quantity),
+        upc: upc.to_owned(),
+        label: invetory_item_entity.label.to_owned(),
+        count: invetory_item_entity.count,
+    }
+}
+
+pub async fn set_standard_quantity(
+    db: &DatabaseConnection,
+    upc: &String,
+    standard_quantity: u32,
+) -> bool {
+    let product_entity = ProductEntity::find()
+        .filter(entity::products::Column::Upc.like(upc))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap();
+    let inventory_item_entity = InventoryEntity::find()
+        .filter(entity::inventory::Column::ProductId.eq(product_entity.id))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap();
+    let mut entity: grocery::ActiveModel = GroceryEntity::find()
+        .filter(entity::grocery::Column::InventoryItemId.eq(inventory_item_entity.id))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap()
+        .into();
+
+    entity.standard_quantity = Set(Some(standard_quantity as i32));
+
+    let result = entity.update(db).await;
+
+    match result {
+        Ok(..) => true,
+        _ => false,
+    }
+}

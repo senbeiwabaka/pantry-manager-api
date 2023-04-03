@@ -77,6 +77,8 @@ fn rocket() -> _ {
                 inventory_controllers::update_inventory_item,
                 inventory_controllers::update_inventory_count,
                 grocery_controllers::get_all_groceries,
+                grocery_controllers::get_grocery_listen_item,
+                grocery_controllers::post_add_inventory_item,
                 grocery_controllers::post_standard_quantity,
             ],
         )

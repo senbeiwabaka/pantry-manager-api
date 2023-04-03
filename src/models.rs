@@ -30,7 +30,7 @@ pub struct InventoryItem {
     pub count: u32,
     pub number_used_in_past_30_days: u32,
     pub on_grocery_list: bool,
-    pub product: Option<Product>,
+    pub product: Product,
 }
 
 // Model representing Groceries, Inventory, and Products.
@@ -42,6 +42,14 @@ pub struct GroceryListItem {
     pub upc: String,
     pub label: String,
     pub count: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, FromQueryResult)]
+pub struct InventoryItemProduct {
+    pub upc: String,
+    pub label: String,
+    pub count: u32,
+    pub inventory_item_id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]

@@ -2,7 +2,6 @@ use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QuerySelect, RelationTrait,
 };
 
-use entity::grocery;
 use entity::grocery::Entity as GroceryEntity;
 
 pub async fn exists(db: &DatabaseConnection, upc: String) -> bool {
