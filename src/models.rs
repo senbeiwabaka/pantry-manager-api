@@ -58,15 +58,6 @@ pub struct Paged<T> {
     pub data: Vec<T>,
 }
 
-impl<T> Paged<T> {
-    pub const fn new() -> Self {
-        Paged {
-            count: 0,
-            data: Vec::new(),
-        }
-    }
-}
-
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct AppConfig {
     pub edaman_api_uri: String,

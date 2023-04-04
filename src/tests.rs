@@ -161,3 +161,12 @@ fn get_product(upc: &String) -> Product {
         label: "".to_string(),
     }
 }
+
+impl<T> Paged<T> {
+    pub const fn new() -> Self {
+        Paged {
+            count: 0,
+            data: Vec::new(),
+        }
+    }
+}

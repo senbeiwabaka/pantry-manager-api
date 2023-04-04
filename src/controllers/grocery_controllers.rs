@@ -10,26 +10,48 @@ use crate::{
 use repository::repositories::grocery_repository;
 
 #[openapi]
+#[get("/pantry-manager/groceries/all")]
+pub async fn get_all_groceries(state: &State<Db>) -> Json<Paged<GroceryListItem>> {
+    let db = state.inner();
+    let data = grocery_services::get_all_groceries(&db.conn).await;
+
+    Json(data)
+}
+
+#[openapi]
 #[get("/pantry-manager/groceries?<page>&<length>")]
-pub async fn get_all_groceries(
+pub async fn get_groceries(
     state: &State<Db>,
     page: Option<u64>,
     length: Option<u64>,
 ) -> Json<Paged<GroceryListItem>> {
     let db = state.inner();
-    let data = grocery_services::get_all_groceries(&db.conn, page, length).await;
+    let data = grocery_services::get_groceries(&db.conn, page, length).await;
+
+    Json(data)
+}
+
+#[openapi]
+#[get("/pantry-manager/groceries/shopping-list?<page>&<length>")]
+pub async fn get_shopping_list(
+    state: &State<Db>,
+    page: Option<u64>,
+    length: Option<u64>,
+) -> Json<Paged<GroceryListItem>> {
+    let db = state.inner();
+    let data = grocery_services::get_shopping_list(&db.conn, page, length).await;
 
     Json(data)
 }
 
 #[openapi]
 #[get("/pantry-manager/groceries/<upc>")]
-pub async fn get_grocery_listen_item(
+pub async fn get_grocery_list_item(
     state: &State<Db>,
     upc: String,
 ) -> Result<(Status, Json<GroceryListItem>), Status> {
     let db = state.inner();
-    let data = grocery_services::get_grocery_listen_item(&db.conn, &upc).await;
+    let data = grocery_services::get_grocery_list_item(&db.conn, &upc).await;
 
     match data {
         Some(x) => Ok((Status::Ok, Json(x))),
@@ -80,4 +102,33 @@ pub async fn post_standard_quantity(
     }
 
     Err(Status::InternalServerError)
+}
+
+#[openapi]
+#[post("/pantry-manager/groceries/shopping/done")]
+pub async fn post_shopping_done(state: &State<Db>) -> Status {
+    let db = state.inner();
+
+    grocery_services::remove_adhoc_items(&db.conn).await;
+
+    grocery_services::reset_items(&db.conn).await;
+
+    Status::NoContent
+}
+
+#[openapi]
+#[post("/pantry-manager/groceries/add/<upc>/<quantity>")]
+pub async fn post_add(state: &State<Db>, upc: String, quantity: u32) -> Status {
+    let db = state.inner();
+    let exists = grocery_repository::exists(&db.conn, upc.clone()).await;
+
+    dbg!(&exists);
+
+    if !exists {
+        return Status::NotFound;
+    }
+
+    grocery_services::set_quantity(&db.conn, &upc, quantity).await;
+
+    Status::NoContent
 }

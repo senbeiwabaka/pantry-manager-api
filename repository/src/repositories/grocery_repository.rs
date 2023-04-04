@@ -19,10 +19,44 @@ pub async fn exists(db: &DatabaseConnection, upc: String) -> bool {
         .await
         .unwrap_or_default();
 
-    dbg!(&entity);
-
     match entity {
         Some(_pp) => true,
         _ => false,
     }
+}
+
+pub async fn get_all_adhoc(db: &DatabaseConnection) -> Vec<entity::grocery::Model> {
+    let entities = GroceryEntity::find()
+        .join(
+            JoinType::LeftJoin,
+            entity::grocery::Relation::Inventory.def(),
+        )
+        .join(
+            JoinType::LeftJoin,
+            entity::inventory::Relation::Products.def(),
+        )
+        .filter(entity::products::Column::Brand.is_null())
+        .all(db)
+        .await
+        .unwrap_or_default();
+
+    entities
+}
+
+pub async fn get_all(db: &DatabaseConnection) -> Vec<entity::grocery::Model> {
+    let entities = GroceryEntity::find()
+        .join(
+            JoinType::LeftJoin,
+            entity::grocery::Relation::Inventory.def(),
+        )
+        .join(
+            JoinType::LeftJoin,
+            entity::inventory::Relation::Products.def(),
+        )
+        .filter(entity::products::Column::Brand.is_not_null())
+        .all(db)
+        .await
+        .unwrap_or_default();
+
+    entities
 }
