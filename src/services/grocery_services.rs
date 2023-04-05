@@ -126,6 +126,7 @@ pub async fn get_groceries(
     paged_data
 }
 
+// Get grocery items where they are marked to be on the list (boolean) and their quantity wanted is greater than 0
 pub async fn get_shopping_list(
     db: &DatabaseConnection,
     page: Option<u64>,
@@ -142,6 +143,7 @@ pub async fn get_shopping_list(
         )
         .select_only()
         .filter(entity::inventory::Column::OnGroceryList.eq(true))
+        .filter(entity::grocery::Column::Quantity.gt(0))
         .count(db)
         .await
         .unwrap();
@@ -177,6 +179,7 @@ pub async fn get_shopping_list(
             entity::inventory::Relation::Products.def(),
         )
         .filter(entity::inventory::Column::OnGroceryList.eq(true))
+        .filter(entity::grocery::Column::Quantity.gt(0))
         .limit(langth_value)
         .offset(page_value)
         .into_model::<GroceryListItem>()
@@ -231,6 +234,7 @@ pub async fn add_grocery_list_item(
     db: &DatabaseConnection,
     upc: &String,
     standard_quantity: u32,
+    quantity: Option<i32>,
 ) -> GroceryListItem {
     let invetory_item_entity = InventoryEntity::find()
         .filter(entity::products::Column::Upc.like(upc))
@@ -251,6 +255,7 @@ pub async fn add_grocery_list_item(
     let entity = grocery::ActiveModel {
         shopped: Set(Some(false)),
         standard_quantity: Set(Some(standard_quantity as i32)),
+        quantity: Set(quantity),
         inventory_item_id: Set(invetory_item_entity.inventory_item_id),
         ..Default::default()
     };

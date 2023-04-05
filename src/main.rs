@@ -81,9 +81,10 @@ fn rocket() -> _ {
                 grocery_controllers::get_shopping_list,
                 grocery_controllers::get_grocery_list_item,
                 grocery_controllers::post_add_inventory_item,
+                grocery_controllers::post_add_adhoc,
                 grocery_controllers::post_standard_quantity,
                 grocery_controllers::post_shopping_done,
-                grocery_controllers::post_add,
+                grocery_controllers::post_set_quantity,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_docs()))

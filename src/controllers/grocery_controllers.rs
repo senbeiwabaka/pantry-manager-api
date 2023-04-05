@@ -4,7 +4,7 @@ use rocket_okapi::openapi;
 
 use crate::{
     models::{GroceryListItem, InventoryItem, Paged},
-    services::grocery_services,
+    services::{grocery_services, inventory_services, product_services},
 };
 
 use repository::repositories::grocery_repository;
@@ -68,15 +68,48 @@ pub async fn post_add_inventory_item(
     let db = state.inner();
     let exists = grocery_repository::exists(&db.conn, inventory_item.product.upc.clone()).await;
 
-    dbg!(&inventory_item);
-    println!("grocery item exists: {}", &exists);
-
     if exists {
         return Err(Status::Conflict);
     }
 
     let grocery_list_item =
-        grocery_services::add_grocery_list_item(&db.conn, &inventory_item.product.upc, 1).await;
+        grocery_services::add_grocery_list_item(&db.conn, &inventory_item.product.upc, 1, None)
+            .await;
+
+    Ok((Status::Created, Json(grocery_list_item)))
+}
+
+#[openapi]
+#[post(
+    "/pantry-manager/groceries/add-adhoc/<quantity>",
+    data = "<inventory_item>"
+)]
+pub async fn post_add_adhoc(
+    state: &State<Db>,
+    quantity: i32,
+    inventory_item: Json<InventoryItem>,
+) -> Result<(Status, Json<GroceryListItem>), Status> {
+    let db = state.inner();
+    let exists = grocery_repository::exists(&db.conn, inventory_item.product.upc.clone()).await;
+
+    if exists {
+        return Err(Status::Conflict);
+    }
+
+    product_services::add_product(&db.conn, &inventory_item.product).await;
+
+    let product =
+        product_services::get_product_by_upc(&db.conn, &inventory_item.product.upc.clone()).await;
+
+    inventory_services::add_inventory_item(&db.conn, &product, 0).await;
+
+    let grocery_list_item = grocery_services::add_grocery_list_item(
+        &db.conn,
+        &inventory_item.product.upc,
+        0,
+        Some(quantity),
+    )
+    .await;
 
     Ok((Status::Created, Json(grocery_list_item)))
 }
@@ -117,8 +150,8 @@ pub async fn post_shopping_done(state: &State<Db>) -> Status {
 }
 
 #[openapi]
-#[post("/pantry-manager/groceries/add/<upc>/<quantity>")]
-pub async fn post_add(state: &State<Db>, upc: String, quantity: u32) -> Status {
+#[post("/pantry-manager/groceries/set-quantity/<upc>/<quantity>")]
+pub async fn post_set_quantity(state: &State<Db>, upc: String, quantity: u32) -> Status {
     let db = state.inner();
     let exists = grocery_repository::exists(&db.conn, upc.clone()).await;
 
