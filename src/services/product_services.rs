@@ -69,23 +69,9 @@ pub async fn lookup_product_by_upc(
     upc: &String,
 ) -> Option<Product> {
     let request_url = format!("{}?app_id={}&app_key={}&upc={}", uri, app_id, app_key, upc);
-
     let client = reqwest::Client::new();
-    let response = client
-        .get(request_url)
-        // .header(
-        //     "x-rapidapi-host",
-        //     "edamam-food-and-grocery-database.p.rapidapi.com",
-        // )
-        // .header("x-rapidapi-key", key)
-        // confirm the request using send()
-        .send()
-        .await
-        .unwrap();
-
+    let response = client.get(request_url).send().await.unwrap();
     let edaman_product: EdamamProduct;
-
-    dbg!(&response);
 
     match response.status() {
         reqwest::StatusCode::OK => {
@@ -124,6 +110,18 @@ pub async fn lookup_product_by_upc(
         category: Some(edaman_product.hints[0].food.category.to_owned()),
         image_url: edaman_product.hints[0].food.image.to_owned(),
     })
+}
+
+pub async fn delete_by_id(db: &DatabaseConnection, id: i32) {
+    let entity: products::ActiveModel = ProductEntity::find()
+        .filter(entity::products::Column::Id.eq(id))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap()
+        .into();
+
+    entity.delete(db).await.unwrap();
 }
 
 #[derive(Serialize, Deserialize, Debug)]

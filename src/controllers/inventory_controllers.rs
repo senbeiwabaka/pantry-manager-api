@@ -53,7 +53,7 @@ pub async fn add_inventory_item(
         return Err(Status::Conflict);
     }
 
-    let inventory_item = inventory_services::add_inventory_item(&db.conn, &product, 1).await;
+    let inventory_item = inventory_services::add_inventory_item(&db.conn, &product, 1, Some(false)).await;
 
     Ok((Status::Created, Json(inventory_item)))
 }

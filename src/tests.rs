@@ -35,7 +35,7 @@ async fn add_inventory_item() {
     };
 
     // Act
-    let result = inventory_services::add_inventory_item(&db, &product, 1).await;
+    let result = inventory_services::add_inventory_item(&db, &product, 1, Some(false)).await;
 
     // Assert
     assert_eq!(inventory_item, result);
@@ -80,7 +80,7 @@ async fn get_all_inventory() {
         product: product.clone(),
     };
 
-    inventory_services::add_inventory_item(&db, &product, 1).await;
+    inventory_services::add_inventory_item(&db, &product, 1, Some(false)).await;
 
     let expected: Paged<InventoryItem> = Paged::<InventoryItem> {
         count: 1,
@@ -119,9 +119,10 @@ async fn get_inventory_by_upc() {
         product: product.clone(),
     };
 
-    inventory_services::add_inventory_item(&db, &product, 1).await;
+    inventory_services::add_inventory_item(&db, &product, 1, Some(false)).await;
 
-    inventory_services::add_inventory_item(&db, &get_product(&"upc 1".to_string()), 3).await;
+    inventory_services::add_inventory_item(&db, &get_product(&"upc 1".to_string()), 3, Some(false))
+        .await;
 
     // Act
     let result = inventory_services::get_inventory_by_upc(&db, &upc).await;

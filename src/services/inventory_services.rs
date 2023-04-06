@@ -14,6 +14,7 @@ pub async fn add_inventory_item(
     db: &DatabaseConnection,
     product: &Product,
     count: u32,
+    on_grocery_list: Option<bool>,
 ) -> InventoryItem {
     let product_entity = ProductEntity::find()
         .filter(products::Column::Upc.like(&product.upc.to_owned()))
@@ -25,7 +26,7 @@ pub async fn add_inventory_item(
     let entity = inventory::ActiveModel {
         count: Set(Some(count as i32)),
         number_used_in_past_thirty_days: Set(Some(0)),
-        on_grocery_list: Set(Some(false)),
+        on_grocery_list: Set(on_grocery_list),
         product_id: Set(product_entity.id),
         ..Default::default()
     };
@@ -172,4 +173,16 @@ pub async fn update_inventory_count(db: &DatabaseConnection, upc: &String, count
         Ok(..) => true,
         _ => false,
     }
+}
+
+pub async fn delete_by_id(db: &DatabaseConnection, id: i32) {
+    let entity: inventory::ActiveModel = InventoryEntity::find()
+        .filter(entity::inventory::Column::Id.eq(id))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap()
+        .into();
+
+    entity.delete(db).await.unwrap();
 }

@@ -1,4 +1,6 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{
+    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QuerySelect, RelationTrait,
+};
 
 use entity::inventory;
 use entity::inventory::Entity as InventoryItemEntity;
@@ -27,4 +29,19 @@ pub async fn exists(db: &DatabaseConnection, upc: String) -> bool {
         }
         _ => false,
     }
+}
+
+pub async fn get_by_id(db: &DatabaseConnection, id: i32) -> entity::inventory::Model {
+    let entity = InventoryItemEntity::find()
+        .join(
+            JoinType::LeftJoin,
+            entity::inventory::Relation::Products.def(),
+        )
+        .filter(entity::inventory::Column::Id.eq(id))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap();
+
+    entity
 }

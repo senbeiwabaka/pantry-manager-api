@@ -35,7 +35,7 @@ pub async fn get_all_adhoc(db: &DatabaseConnection) -> Vec<entity::grocery::Mode
             JoinType::LeftJoin,
             entity::inventory::Relation::Products.def(),
         )
-        .filter(entity::products::Column::Brand.is_null())
+        .filter(entity::products::Column::Brand.eq(""))
         .all(db)
         .await
         .unwrap_or_default();

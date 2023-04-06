@@ -1,5 +1,5 @@
 use migration::JoinType;
-use repository::repositories::grocery_repository;
+use repository::repositories::{grocery_repository, inventory_repository};
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
     QuerySelect, RelationTrait, Set,
@@ -11,6 +11,8 @@ use entity::grocery::Entity as GroceryEntity;
 use entity::inventory::Entity as InventoryEntity;
 use entity::products::Entity as ProductEntity;
 use entity::{grocery, inventory};
+
+use super::{inventory_services, product_services};
 
 pub async fn get_all_groceries(db: &DatabaseConnection) -> Paged<GroceryListItem> {
     let count: usize = GroceryEntity::find()
@@ -327,8 +329,15 @@ pub async fn remove_adhoc_items(db: &DatabaseConnection) {
 
     for model in models {
         let entity: grocery::ActiveModel = model.into();
+        let inventory_id = entity.inventory_item_id.clone().unwrap();
+        let inventory_item = inventory_repository::get_by_id(&db, inventory_id).await;
+        let product_id = inventory_item.product_id.clone();
 
-        entity.delete(db).await.unwrap_err();
+        delete_by_id(&db, entity.id.unwrap()).await;
+
+        inventory_services::delete_by_id(&db, inventory_id).await;
+
+        product_services::delete_by_id(&db, product_id).await;
     }
 }
 
@@ -340,7 +349,7 @@ pub async fn reset_items(db: &DatabaseConnection) {
 
         entity.quantity = Set(entity.standard_quantity.clone().unwrap());
 
-        entity.update(db).await.unwrap_err();
+        entity.update(db).await.unwrap();
     }
 }
 
@@ -373,4 +382,16 @@ pub async fn set_quantity(db: &DatabaseConnection, upc: &String, quantity: u32) 
         Ok(..) => true,
         _ => false,
     }
+}
+
+pub async fn delete_by_id(db: &DatabaseConnection, id: i32) {
+    let entity: grocery::ActiveModel = GroceryEntity::find()
+        .filter(entity::grocery::Column::Id.eq(id))
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap()
+        .into();
+
+    entity.delete(db).await.unwrap();
 }
