@@ -35,6 +35,7 @@ pub async fn add_product(db: &DatabaseConnection, product: &Product) {
         category: Set(product.category.to_owned()),
         label: Set(Some(product.label.to_owned())),
         upc: Set(product.upc.to_owned()),
+        image_url: Set(product.image_url.to_owned()),
         ..Default::default()
     }
     .save(db)
