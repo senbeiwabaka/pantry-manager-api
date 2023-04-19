@@ -61,7 +61,7 @@ pub async fn get_grocery_list_item(
 
 #[openapi]
 #[post("/pantry-manager/groceries", data = "<inventory_item>")]
-pub async fn post_add_inventory_item(
+pub async fn post_grocery_item(
     state: &State<Db>,
     inventory_item: Json<InventoryItem>,
 ) -> Result<(Status, Json<GroceryListItem>), Status> {
