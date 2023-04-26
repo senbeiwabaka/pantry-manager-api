@@ -14,21 +14,7 @@ use entity::{grocery, inventory};
 
 use super::{inventory_services, product_services};
 
-pub async fn get_all_groceries(db: &DatabaseConnection) -> Paged<GroceryListItem> {
-    let count: usize = GroceryEntity::find()
-        .join(
-            JoinType::LeftJoin,
-            entity::grocery::Relation::Inventory.def(),
-        )
-        .join(
-            JoinType::LeftJoin,
-            entity::inventory::Relation::Products.def(),
-        )
-        .select_only()
-        .count(db)
-        .await
-        .unwrap();
-
+pub async fn get_all_groceries(db: &DatabaseConnection) -> Vec<GroceryListItem> {
     let entities = GroceryEntity::find()
         .select_only()
         .column(entity::products::Column::Upc)
@@ -56,12 +42,7 @@ pub async fn get_all_groceries(db: &DatabaseConnection) -> Paged<GroceryListItem
         .await
         .unwrap();
 
-    let paged_data = Paged::<GroceryListItem> {
-        count,
-        data: entities,
-    };
-
-    paged_data
+    entities
 }
 
 pub async fn get_groceries(

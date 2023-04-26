@@ -11,7 +11,7 @@ use repository::repositories::grocery_repository;
 
 #[openapi]
 #[get("/pantry-manager/groceries/all")]
-pub async fn get_all_groceries(state: &State<Db>) -> Json<Paged<GroceryListItem>> {
+pub async fn get_all_groceries(state: &State<Db>) -> Json<Vec<GroceryListItem>> {
     let db = state.inner();
     let data = grocery_services::get_all_groceries(&db.conn).await;
 
