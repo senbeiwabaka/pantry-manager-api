@@ -69,10 +69,24 @@ pub async fn lookup_product_by_upc(
     app_key: &String,
     upc: &String,
 ) -> Option<Product> {
+    println!("uri: {}", uri);
+    println!("app_id: {}", app_id);
+    println!("app_key: {}", app_key);
+    println!("upc: {}", upc);
+
     let request_url = format!("{}?app_id={}&app_key={}&upc={}", uri, app_id, app_key, upc);
     let client = reqwest::Client::new();
-    let response = client.get(request_url).send().await.unwrap();
+    let response_result = client.get(request_url).send().await;
     let edaman_product: EdamamProduct;
+
+    let response = match response_result {
+        Ok(x) => x,
+        Err(error) => {
+            println!("EDAMAN request failure {}", error);
+
+            return None;
+        }
+    };
 
     match response.status() {
         reqwest::StatusCode::OK => {

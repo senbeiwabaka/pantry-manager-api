@@ -1,6 +1,6 @@
 [default.databases.pantry_manager]
-url = "postgres://postgres:mysecretpassword@docker-database.localdomain/pantry_test"
+url = "postgres://postgres:mysecretpassword@infrastructure-pi.localdomain/pantry_manager_api"
 
 [default]
-log_level = "debug"
 address = "0.0.0.0"
+log_level = "debug"

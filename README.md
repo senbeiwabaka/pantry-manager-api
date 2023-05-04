@@ -21,4 +21,4 @@ Added OpenAPI via Okapi. You can see it by going to `http://localhost:8000/swagg
 
 sudo docker build . -t pantry-manager-api
 
-sudo docker run --name pantry-manager-api -d -p 8000:8000 -e ROCKET_log_level=debug pantry-manager-api
+sudo docker run --name pantry-manager-api -d -p 8000:8000 -e ROCKET_log_level=normal pantry-manager-api
