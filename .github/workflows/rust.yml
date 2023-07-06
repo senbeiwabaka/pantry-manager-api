@@ -16,11 +16,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: ATiltedTree/setup-rust@v1
+    - name: Setup Rust
+      uses: ATiltedTree/setup-rust@v1.0.5
       with:
           rust-version: stable
           components: clippy
     - name: Build
-      run: cargo clippy
+      run: cargo clippy 
     - name: Run tests
       run: cargo test --verbose
