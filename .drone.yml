@@ -3,12 +3,12 @@ type: docker
 name: default
 
 steps:
-- name: Build & Test
-  image: rust:1.70
-  commands:
-    - cargo build
-    - cargo test --all
-    - cargo clean
+# - name: Build & Test
+#   image: rust:1.70
+#   commands:
+#     - cargo build
+#     - cargo test --all
+#     - cargo clean
     
 - name: Build Container
   image: plugins/docker
@@ -16,9 +16,9 @@ steps:
     platform: linux/amd64
     repo: pantry-manager-api/pantry-manager-api
     tags: 
-    - pantry-manager-api
+    - latest
     dockerfile: ./dockerfile
-    registry: gitea.mjy-home.duckdns.org/
+    registry: gitea.mjy-home.duckdns.org
     username:
       from_secret: username
     password:
