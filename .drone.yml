@@ -3,8 +3,17 @@ type: docker
 name: default
 
 steps:
-- name: test
+- name: Build & Test
   image: rust:1.70
   commands:
-  - cargo build
-  - cargo test --all
+    - cargo build
+    - cargo test --all
+
+- name: Build Container
+  image: plugins/docker
+  commands:
+    - docker build
+
+trigger:
+  branch:
+  - main
