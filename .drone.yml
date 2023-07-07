@@ -12,6 +12,11 @@ steps:
 
 - name: Build Container
   image: plugins/docker
+  environment:
+    USERNAME:
+      from_secret: username
+    PASSWORD:
+      from_secret: password
   settings:
     platform: linux/amd64
     repo: pantry-manager-api/pantry-manager-api
@@ -19,6 +24,8 @@ steps:
     - pantry-manager-api
     dockerfile: ./dockerfile
     registry: gitea.mjy-home.duckdns.org/
+    username: $USERNAME
+    password: $PASSWORD
 
 trigger:
   branch:
