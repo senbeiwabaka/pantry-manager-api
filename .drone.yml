@@ -16,6 +16,7 @@ steps:
     repo: pantrymanager/pantrymanagerapi
     dry_run: true
     target: pantry-manager-api
+    dockerfile: ./dockerfile
 
 trigger:
   branch:
