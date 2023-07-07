@@ -15,7 +15,6 @@ steps:
   settings:
     platform: linux/amd64
     repo: pantry-manager-api/pantry-manager-api
-    dry_run: true
     tags: 
     - pantry-manager-api
     dockerfile: ./dockerfile
