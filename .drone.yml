@@ -18,7 +18,7 @@ steps:
     tags: 
     - pantry-manager-api
     dockerfile: ./dockerfile
-    registry: https://gitea.mjy-home.duckdns.org/
+    registry: gitea.mjy-home.duckdns.org/
 
 trigger:
   branch:
