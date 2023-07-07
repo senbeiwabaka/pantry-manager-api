@@ -11,8 +11,11 @@ steps:
 
 - name: Build Container
   image: plugins/docker
-  commands:
-    - docker build . -t pantry-manager-api
+  settings:
+    platform: linux/amd64
+    repo: pantrymanager/pantrymanagerapi
+    dry_run: true
+    target: pantry-manager-api
 
 trigger:
   branch:
