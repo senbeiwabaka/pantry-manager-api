@@ -29,7 +29,7 @@ steps:
     password:
       from_secret: password
 
-- name: Build Container
+- name: Deploy Container
   image: alpine:3.8
   environment:
     PASSWORD:
