@@ -22,14 +22,19 @@ steps:
     tags: 
     - latest
     dockerfile: ./dockerfile
-    insecure: true
+    dry_run: true
     registry: gitea.mjy-home.duckdns.org
     username:
       from_secret: username
     password:
       from_secret: password
 
-# - name: Build Container
-#   image: alpine:3.8
-#   command:
-#   - docker login gitea.example.com
+- name: Build Container
+  image: alpine:3.8
+  environment:
+    PASSWORD:
+      from_secret: password
+    USERNAME:
+      from_secret: username
+  command:
+  - docker login gitea.mjy-home.duckdns.org -u $USERNAME -p $PASSWORD
