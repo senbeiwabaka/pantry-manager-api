@@ -2,6 +2,10 @@ kind: pipeline
 type: docker
 name: default
 
+trigger:
+  branch:
+  - main
+
 steps:
 # - name: Build & Test
 #   image: rust:1.70
@@ -18,12 +22,14 @@ steps:
     tags: 
     - latest
     dockerfile: ./dockerfile
+    insecure: true
     registry: gitea.mjy-home.duckdns.org
     username:
       from_secret: username
     password:
       from_secret: password
 
-trigger:
-  branch:
-  - main
+# - name: Build Container
+#   image: alpine:3.8
+#   command:
+#   - docker login gitea.example.com
