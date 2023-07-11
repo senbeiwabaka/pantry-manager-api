@@ -17,7 +17,7 @@ steps:
   - name: Build & Deploy Linux Container
     image: plugins/docker
     settings:
-      platform: linux/amd64, linux/arm64
+      platform: linux/amd64,linux/arm64
       repo: gitea.mjy-home.duckdns.org/michael/pantry-manager-api
       tags:
         - latest
