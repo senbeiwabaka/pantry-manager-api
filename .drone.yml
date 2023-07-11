@@ -18,7 +18,7 @@ steps:
   image: plugins/docker
   settings:
     platform: linux/amd64
-    repo: pantry-manager-api/pantry-manager-api
+    repo: gitea.mjy-home.duckdns.org/michael/pantry-manager-api
     tags: 
     - latest
     dockerfile: ./dockerfile
