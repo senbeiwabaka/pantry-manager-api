@@ -14,13 +14,29 @@ steps:
     - cargo test --all
     - cargo clean
     
-- name: Build & Deploy Container
+- name: Build & Deploy Linux Container
   image: plugins/docker
   settings:
     platform: linux/amd64
     repo: gitea.mjy-home.duckdns.org/michael/pantry-manager-api
     tags: 
     - latest
+    - '0.1'
+    dockerfile: ./dockerfile
+    registry: gitea.mjy-home.duckdns.org
+    username:
+      from_secret: username
+    password:
+      from_secret: password
+
+- name: Build & Deploy Arm Container
+  image: plugins/docker
+  settings:
+    platform: linux/arm64
+    repo: gitea.mjy-home.duckdns.org/michael/pantry-manager-api
+    tags: 
+    - latest
+    - '0.1'
     dockerfile: ./dockerfile
     registry: gitea.mjy-home.duckdns.org
     username:
