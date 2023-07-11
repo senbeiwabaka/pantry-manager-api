@@ -7,14 +7,14 @@ trigger:
   - main
 
 steps:
-# - name: Build & Test
-#   image: rust:1.70
-#   commands:
-#     - cargo build
-#     - cargo test --all
-#     - cargo clean
+- name: Build & Test
+  image: rust:1.70
+  commands:
+    - cargo build
+    - cargo test --all
+    - cargo clean
     
-- name: Build Container
+- name: Build & Deploy Container
   image: plugins/docker
   settings:
     platform: linux/amd64
@@ -22,19 +22,8 @@ steps:
     tags: 
     - latest
     dockerfile: ./dockerfile
-    #dry_run: true
     registry: gitea.mjy-home.duckdns.org
     username:
       from_secret: username
     password:
       from_secret: password
-
-# - name: Deploy Container
-#   image: alpine:3.8
-#   environment:
-#     PASSWORD:
-#       from_secret: password
-#     USERNAME:
-#       from_secret: username
-#   command:
-#   - docker login gitea.mjy-home.duckdns.org -u $USERNAME -p $PASSWORD
