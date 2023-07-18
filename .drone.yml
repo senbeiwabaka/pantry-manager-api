@@ -1,10 +1,9 @@
 kind: pipeline
 type: docker
-name: default
+name: amd64
 
-trigger:
-  branch:
-    - main
+platform:
+  arch: amd64
 
 steps:
   - name: Build & Test
@@ -37,6 +36,18 @@ steps:
       password:
         from_secret: password
 
+---
+kind: pipeline
+type: docker
+name: arm
+
+platform:
+  arch: arm64
+
+depends_on:
+  - amd64
+
+steps:
   - name: Build & Deploy Arm Container
     image: plugins/docker
     settings:
