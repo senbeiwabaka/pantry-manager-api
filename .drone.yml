@@ -21,7 +21,7 @@ steps:
       - cargo clippy --message-format=json &> ./report.json
 
   - name: something
-    image: alpine
+    image: docker:20.10.14-dind
     commands:
       - docker run --rm --security-opt seccomp=unconfined -v "${PWD}:/volume" xd009642/tarpaulin
 
