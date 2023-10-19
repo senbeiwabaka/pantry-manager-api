@@ -20,16 +20,20 @@ steps:
       - cargo clippy --message-format=json
       - cargo clippy --message-format=json &> ./report.json
 
-  - name: something
-    image: docker:20.10.14-dind
-    commands:
-      - docker run --rm --security-opt seccomp=unconfined -v "${PWD}:/volume" xd009642/tarpaulin
+  # - name: something
+  #   image: docker:20.10.14-dind
+  #   commands:
+  #     - docker run --rm --security-opt seccomp=unconfined -v "${PWD}:/volume" xd009642/tarpaulin
 
   - name: 'code coverage for sonar'
     image: rust:1.70
+    environment:
+      RUSTFLAGS: '-Cinstrument-coverage'
+      LLVM_PROFILE_FILE: 'your_name-%p-%m.profraw'
     commands:
-      - cargo install cargo-tarpaulin
-      - cargo tarpaulin --tests --out Xml 
+      - cargo build
+      - cargo test
+      - grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing -o ./lcov.info 
 
   - name: test
     image: alpine
