@@ -20,6 +20,11 @@ steps:
       - cargo clippy --message-format=json
       - cargo clippy --message-format=json &> ./report.json
 
+  - name: something
+    image: alpine
+    commands:
+      - docker run --rm --security-opt seccomp=unconfined -v "${PWD}:/volume" xd009642/tarpaulin
+
   - name: 'code coverage for sonar'
     image: rust:1.70
     commands:
