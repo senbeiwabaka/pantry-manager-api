@@ -17,8 +17,7 @@ steps:
     image: rust:1.70
     commands:
       - rustup component add clippy
-      - cargo clippy --message-format=json
-      - cargo clippy --message-format=json &> ./report.json
+      - cargo clippy --message-format=json > ./report.json
 
   # - name: something
   #   image: docker:20.10.14-dind
@@ -29,18 +28,18 @@ steps:
     image: rust:1.70
     environment:
       RUSTFLAGS: '-Cinstrument-coverage'
-      LLVM_PROFILE_FILE: 'your_name-%p-%m.profraw'
+      LLVM_PROFILE_FILE: 'pantry-manager-api-%p-%m.profraw'
     commands:
       - rustup component add llvm-tools-preview
       - cargo install grcov
       - cargo build
       - cargo test
-      - grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing -o ./lcov.info 
+      #- grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing -o ./lcov.info 
+      - grcov . --binary-path ./target/debug/ -s . -t cobertura --branch --ignore-not-existing -0 ./cobertura.xml
 
   - name: test
     image: alpine
     commands:
-      - ls
       - ls -l
       - cat report.json
       - cat ./report.json
