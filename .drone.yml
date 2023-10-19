@@ -24,7 +24,7 @@ steps:
     image: rust:1.70
     commands:
       - cargo install cargo-tarpaulin
-      - cargo tarpaulin --out Xml 
+      - cargo tarpaulin --tests --out Xml 
 
   - name: test
     image: alpine
