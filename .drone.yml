@@ -13,6 +13,11 @@ steps:
       - cargo test --all
       - cargo clean
 
+  - name: items for sonar
+    image: rust:1.70
+    commands:
+      - cargo clippy --message-format=json &> ./clippy/report.json
+
   - name: code-analysis
     image: aosapps/drone-sonar-plugin
     settings:
