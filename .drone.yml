@@ -16,6 +16,7 @@ steps:
   - name: 'items for sonar'
     image: rust:1.70
     commands:
+      - cargo clippy --message-format=json
       - cargo clippy --message-format=json &> ./report.json
 
   - name: test
@@ -31,6 +32,8 @@ steps:
         from_secret: sonar_host
       sonar_token:
         from_secret: sonar_token
+      showProfiling: true
+      usingProperties: true
 
   - name: Build & Deploy Linux Container
     image: plugins/docker
