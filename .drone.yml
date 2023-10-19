@@ -6,19 +6,25 @@ platform:
   arch: amd64
 
 steps:
-  - name: Build & Test
+  - name: 'build and test'
     image: rust:1.70
     commands:
       - cargo build
       - cargo test --all
       - cargo clean
 
-  - name: items for sonar
+  - name: 'items for sonar'
     image: rust:1.70
     commands:
       - cargo clippy --message-format=json &> ./report.json
 
-  - name: code-analysis
+  - name: test
+    image: alpine
+    commands:
+      - ls
+      - cat ./report.json
+
+  - name: 'code analysis'
     image: aosapps/drone-sonar-plugin
     settings:
       sonar_host:
@@ -30,7 +36,7 @@ steps:
     image: plugins/docker
     settings:
       platform: linux/amd64
-      repo: gitea.mjy-home.duckdns.org/michael/pantry-manager-api
+      repo: gitea.mjy-home.duckdns.org/michaelyahner/pantry-manager-api
       tags:
         - "latest-linux-amd64"
         - "0.1-linux-amd64"
@@ -57,7 +63,7 @@ steps:
     image: plugins/docker
     settings:
       platform: linux/arm64
-      repo: gitea.mjy-home.duckdns.org/michael/pantry-manager-api
+      repo: gitea.mjy-home.duckdns.org/michaelyahner/pantry-manager-api
       tags:
         - "latest-linux-arm64"
         - "0.1-linux-arm64"
