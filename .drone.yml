@@ -22,7 +22,7 @@ steps:
     image: alpine
     commands:
       - ls
-      - cat ./report.json
+      - cat report.json
 
   - name: 'code analysis'
     image: aosapps/drone-sonar-plugin
