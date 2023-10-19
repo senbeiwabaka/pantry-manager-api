@@ -13,18 +13,26 @@ steps:
       - cargo test --all
       - cargo clean
 
-  - name: 'items for sonar'
+  - name: 'clippy for sonar'
     image: rust:1.70
     commands:
       - rustup component add clippy
       - cargo clippy --message-format=json
       - cargo clippy --message-format=json &> ./report.json
 
+  - name: 'code coverage for sonar'
+    image: rust:1.70
+    commands:
+      - cargo install cargo-tarpaulin
+      - cargo tarpaulin --out Xml 
+
   - name: test
     image: alpine
     commands:
       - ls
+      - ls -l
       - cat report.json
+      - cat ./report.json
 
   - name: 'code analysis'
     image: aosapps/drone-sonar-plugin
