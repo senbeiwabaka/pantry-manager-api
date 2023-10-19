@@ -16,6 +16,7 @@ steps:
   - name: 'items for sonar'
     image: rust:1.70
     commands:
+      - rustup component add clippy
       - cargo clippy --message-format=json
       - cargo clippy --message-format=json &> ./report.json
 
