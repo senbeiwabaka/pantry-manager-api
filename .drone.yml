@@ -47,20 +47,31 @@ steps:
       showProfiling: true
       usingProperties: true
 
+  # - name: Build & Deploy Linux Container
+  #   image: plugins/docker
+  #   settings:
+  #     platform: linux/amd64
+  #     repo: gitea.mjy-home.duckdns.org/michaelyahner/pantry-manager-api
+  #     tags:
+  #       - "latest-linux-amd64"
+  #       - "0.1-linux-amd64"
+  #     dockerfile: ./dockerfile
+  #     registry: gitea.mjy-home.duckdns.org
+  #     username:
+  #       from_secret: username
+  #     password:
+  #       from_secret: password
+
   - name: Build & Deploy Linux Container
     image: plugins/docker
     settings:
       platform: linux/amd64
-      repo: gitea.mjy-home.duckdns.org/michaelyahner/pantry-manager-api
+      repo: github/pantry-manager-api
       tags:
         - "latest-linux-amd64"
         - "0.1-linux-amd64"
       dockerfile: ./dockerfile
-      registry: gitea.mjy-home.duckdns.org
-      username:
-        from_secret: username
-      password:
-        from_secret: password
+      registry: nexusoss.mjy-home.duckdns.org/repository/mjy/
 
 ---
 kind: pipeline
