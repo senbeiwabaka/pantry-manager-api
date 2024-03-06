@@ -6,15 +6,15 @@ platform:
   arch: amd64
 
 steps:
-  - name: 'build and test'
-    image: rust:1.70
+  - name: "build and test"
+    image: rust:1.76.0
     commands:
       - cargo build
       - cargo test --all
       - cargo clean
 
-  - name: 'clippy for sonar'
-    image: rust:1.70
+  - name: "clippy for sonar"
+    image: rust:1.76.0
     commands:
       - rustup component add clippy
       - cargo clippy --message-format=json > ./report.json
@@ -24,17 +24,17 @@ steps:
   #   commands:
   #     - docker run --rm --security-opt seccomp=unconfined -v "${PWD}:/volume" xd009642/tarpaulin
 
-  - name: 'code coverage for sonar'
-    image: rust:1.70
+  - name: "code coverage for sonar"
+    image: rust:1.76.0
     environment:
-      RUSTFLAGS: '-Cinstrument-coverage'
-      LLVM_PROFILE_FILE: 'pantry-manager-api-%p-%m.profraw'
+      RUSTFLAGS: "-Cinstrument-coverage"
+      LLVM_PROFILE_FILE: "pantry-manager-api-%p-%m.profraw"
     commands:
       - rustup component add llvm-tools-preview
       - cargo install grcov
       - cargo build
       - cargo test
-      #- grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing -o ./lcov.info 
+      #- grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing -o ./lcov.info
       - grcov . --binary-path ./target/debug/ -s . -t cobertura --branch --ignore-not-existing -o ./cobertura.xml
 
   - name: test
@@ -44,7 +44,7 @@ steps:
       - cat report.json
       - cat ./report.json
 
-  - name: 'code analysis'
+  - name: "code analysis"
     image: aosapps/drone-sonar-plugin
     settings:
       sonar_host:
