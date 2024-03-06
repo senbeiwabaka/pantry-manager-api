@@ -37,13 +37,6 @@ steps:
       #- grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing -o ./lcov.info
       - grcov . --binary-path ./target/debug/ -s . -t cobertura --branch --ignore-not-existing -o ./cobertura.xml
 
-  - name: test
-    image: alpine
-    commands:
-      - ls -l
-      - cat report.json
-      - cat ./report.json
-
   - name: "code analysis"
     image: aosapps/drone-sonar-plugin
     settings:
