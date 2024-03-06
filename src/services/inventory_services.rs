@@ -46,7 +46,7 @@ pub async fn get_all_inventory(
     page: Option<u64>,
     length: Option<u64>,
 ) -> Paged<InventoryItem> {
-    let count: usize = InventoryEntity::find()
+    let count: u64 = InventoryEntity::find()
         .find_also_related(ProductEntity)
         .count(db)
         .await

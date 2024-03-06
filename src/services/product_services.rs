@@ -43,7 +43,7 @@ pub async fn add_product(db: &DatabaseConnection, product: &Product) {
     .expect("Failed to save new product");
 }
 
-pub async fn get_product_by_upc(db: &DatabaseConnection, upc: &String) -> Product {
+pub async fn get_product_by_upc(db: &DatabaseConnection, upc: String) -> Product {
     let product_entity = ProductEntity::find()
         .filter(products::Column::Upc.like(&upc))
         .one(db)

@@ -54,7 +54,7 @@ pub struct InventoryItemProduct {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 pub struct Paged<T> {
-    pub count: usize,
+    pub count: u64,
     pub data: Vec<T>,
 }
 

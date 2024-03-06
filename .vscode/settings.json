@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "http-docker-9000",
+        "projectKey": "senbeiwabaka_pantry-manager-api_AYuW7b7nKsN7YYU1slaD"
+    }
+}

@@ -6,8 +6,9 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = {version = "0.5.0-rc.2"}
-sea-orm = {version = "^0.8", features = ["sqlx-postgres", "runtime-tokio-native-tls"]}
-
-[dependencies.sea-orm-rocket]
-git = "https://github.com/SeaQL/sea-orm"
+rocket = { version = "0.5.0" }
+sea-orm = { version = "0.12.14", features = [
+    "sqlx-postgres",
+    "runtime-tokio-native-tls",
+] }
+sea-orm-rocket = { version = "0.5.4" }

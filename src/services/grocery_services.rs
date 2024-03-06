@@ -50,7 +50,7 @@ pub async fn get_groceries(
     page: Option<u64>,
     length: Option<u64>,
 ) -> Paged<GroceryListItem> {
-    let count: usize = GroceryEntity::find()
+    let count: u64 = GroceryEntity::find()
         .join(
             JoinType::LeftJoin,
             entity::grocery::Relation::Inventory.def(),
@@ -115,7 +115,7 @@ pub async fn get_shopping_list(
     page: Option<u64>,
     length: Option<u64>,
 ) -> Paged<GroceryListItem> {
-    let count: usize = GroceryEntity::find()
+    let count: u64 = GroceryEntity::find()
         .join(
             JoinType::LeftJoin,
             entity::grocery::Relation::Inventory.def(),

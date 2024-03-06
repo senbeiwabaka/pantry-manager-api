@@ -1,6 +1,5 @@
 [default.databases.pantry_manager]
-url = "postgres://postgres:mysecretpassword@infrastructure-pi.localdomain/pantry_manager_api"
+url = ""
 
 [default]
-address = "0.0.0.0"
 log_level = "debug"

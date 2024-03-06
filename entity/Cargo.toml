@@ -6,4 +6,5 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sea-orm = "0.8.0"
+sea-orm = "0.12.14"
+rocket = "0.5.0"

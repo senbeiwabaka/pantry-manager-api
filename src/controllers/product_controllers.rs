@@ -32,7 +32,7 @@ pub async fn get_product(state: &State<Db>, upc: String) -> Result<Json<Product>
         return Err(Status::NotFound);
     }
 
-    let product = product_services::get_product_by_upc(&db.conn, &upc).await;
+    let product = product_services::get_product_by_upc(&db.conn, upc).await;
 
     dbg!(&product);
 

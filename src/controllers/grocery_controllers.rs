@@ -99,7 +99,7 @@ pub async fn post_add_adhoc(
     product_services::add_product(&db.conn, &inventory_item.product).await;
 
     let product =
-        product_services::get_product_by_upc(&db.conn, &inventory_item.product.upc.clone()).await;
+        product_services::get_product_by_upc(&db.conn, inventory_item.product.upc.clone()).await;
 
     inventory_services::add_inventory_item(
         &db.conn,
