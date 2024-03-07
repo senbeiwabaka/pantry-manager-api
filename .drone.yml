@@ -66,7 +66,7 @@ steps:
     image: plugins/docker
     settings:
       platform: linux/amd64
-      repo: github/pantry-manager-api
+      repo: nexusoss.mjy-home.duckdns.org/repository/mjy/pantry-manager-api
       tags:
         - "latest-linux-amd64"
         - "0.1-linux-amd64"
