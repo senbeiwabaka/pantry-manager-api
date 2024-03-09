@@ -73,6 +73,7 @@ steps:
       dockerfile: ./dockerfile
       registry: nexusoss.mjy-home.duckdns.org
       debug: true
+      insecure: true
 
 ---
 kind: pipeline
