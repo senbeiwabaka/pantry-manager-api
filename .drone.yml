@@ -71,7 +71,7 @@ steps:
         - "latest-linux-amd64"
         - "0.1-linux-amd64"
       dockerfile: ./dockerfile
-      registry: nexusoss.mjy-home.duckdns.org/repository/mjy/
+      registry: nexusoss.mjy-home.duckdns.org
 
 ---
 kind: pipeline
